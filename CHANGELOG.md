@@ -8,6 +8,12 @@ Se você roda o DeskcommCRM numa VPS, **leia a seção da versão para a qual es
 
 ## [Não lançado]
 
+## [1.103.3] — 2026-11-08
+
+### Adicionado
+
+- **Cópia diária do backup fora da VPS, criptografada.** O novo hostgator-setup-kit/backup-externo.sh envia o backup do kit (banco, sessões do WhatsApp e anexos) para um balde do Backblaze B2, criptografado antes de sair do servidor. Nada muda no funcionamento do CRM.
+
 ## [1.103.2] — 2026-11-08
 
 ### Corrigido
