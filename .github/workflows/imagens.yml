@@ -53,7 +53,7 @@ jobs:
           - name: deskcomm-voice-agent
             dockerfile: Dockerfile.voice-agent
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
 
       - name: Normalizar versão
         id: ver
