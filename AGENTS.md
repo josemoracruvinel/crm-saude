@@ -1,4 +1,43 @@
-# Repository Guidelines
+# Repository Guidelines — Fluxo Care
+
+## ⚠️ FLUXO CARE — LEIA PRIMEIRO (prevalece sobre o resto deste arquivo)
+
+Este repositório é o **Fluxo Care**, mantido pela **Fluxo Auditoria** (www.fluxoauditoria.com.br).
+Ele nasceu do DeskcommCRM (MIT) e é **independente desde a v1.103.1 (08/11/2026)**: não há vínculo,
+sincronização nem atualização automática com o projeto original. O que vem abaixo deste bloco é a
+doutrina herdada: as regras de engenharia (multi-tenancy, RLS, migrations + baseline, LGPD, auditoria,
+idempotência, anti-patterns) **continuam valendo integralmente**. Onde o texto herdado falar do projeto
+original, valem as correções abaixo.
+
+**Produto e público**
+- Médicos recém-formados, consultórios e pequenas clínicas (inclusive odontológicas). Núcleo atual:
+  atendimento por WhatsApp com IA, CRM, agenda. Em construção: prontuário eletrônico, prescrição pela
+  Memed e teleconsulta com Jitsi próprio (para odontologia, só prontuário).
+- O **prontuário será um app separado, em repositório privado próprio**, ao lado deste CRM (mesmo login
+  via Supabase Auth, integração pela API `/api/v1` com token `dsk_`). Não colocar dados clínicos neste repo.
+- Quem toca o projeto **não é programador** e desenvolve com o Cursor: explique em português simples,
+  uma coisa de cada vez, e prefira mudanças pequenas que não alterem o funcionamento atual.
+
+**Repositório, versões e servidor**
+- Repositório: `github.com/josemoracruvinel/crm-saude` (público). Imagens: `ghcr.io/josemoracruvinel/*`
+  (públicas). **Nunca** apontar remote, imagens, links ou scripts para `melgarafael/DeskcommCRM`.
+  Correção do projeto original só entra trazida **à mão**, com decisão explícita do dono.
+- CI: só existe `.github/workflows/imagens.yml` (gera as 4 imagens amd64). Os workflows herdados estão
+  em `.github/workflows-upstream-desativados/` e **não rodam**. Não há branch protection nem checks
+  obrigatórios: tudo que este arquivo chama de "obrigatório no CI" (`verify`, `invariants`, `e2e`,
+  `build-and-size`, `imagens-ok`) você roda **localmente** antes de publicar (`pnpm typecheck`,
+  `pnpm lint`, `pnpm test:unit`, e `pnpm test:db` quando mexer em schema).
+- Publicar versão: entrada no `CHANGELOG.md` → commit na `main` → `git tag -a vX.Y.Z` e push da tag
+  (dispara `imagens.yml`) → esperar as 4 imagens → criar a **Release** no GitHub (o servidor lê
+  `releases/latest`) → atualizar pela tela **Configurações › Atualização do sistema**.
+- Servidor: VPS Hostinger, instalação em `/root/DeskcommCRM`, compose com **três** arquivos
+  (`docker-compose.prod.yml`, `docker-compose.single-server.yml`, `docker-compose.traefik.yml`).
+- Os nomes técnicos `deskcomm*` (pasta, contêineres, imagens, volumes, variáveis `DESKCOMM_*`) foram
+  **mantidos de propósito**: renomear muda os volumes do Docker e o banco "some". Não renomear.
+- Marca: nome, logos e cores ficam no **banco** (tela `/admin/marca`), não no código.
+- Ignore o que for só do projeto original: site e guias em deskcomm.com.br, corte de release por
+  `release.yml`, triagem de PRs, all-contributors, executor próprio, Dependabot e comandos
+  `gh api repos/melgarafael/...`.
 
 > Contrato portável para **qualquer** agente de código (Codex, Cursor, OpenCode, Antigravity, Copilot).
 > Este arquivo é o núcleo. A **doutrina completa e não-negociável vive em [`CLAUDE.md`](CLAUDE.md)** —

@@ -1,0 +1,12 @@
+---
+description: Fluxo Care — contexto obrigatório deste repositório
+alwaysApply: true
+---
+
+Este repositório é o **Fluxo Care** (Fluxo Auditoria), derivado do DeskcommCRM e mantido de forma
+independente. Antes de qualquer tarefa, leia o bloco "FLUXO CARE — LEIA PRIMEIRO" no topo de
+`AGENTS.md` (ou `CLAUDE.md`): ele prevalece sobre o resto da documentação herdada.
+
+Resumo: responda em português simples, uma coisa de cada vez; mudanças pequenas que não alterem o
+funcionamento atual; nunca apontar nada para `melgarafael/DeskcommCRM`; não renomear os nomes técnicos
+`deskcomm*`; o guia `deskcomm-contribuir` não se aplica; o prontuário será um app separado em repositório privado.

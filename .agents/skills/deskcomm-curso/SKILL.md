@@ -14,7 +14,7 @@ Esta skill é a automação com IA: você lê as mudanças, corrige o material e
 capturadores existentes. O planejador só faz a triagem determinística. Não inicie um daemon,
 agendamento pago nem outra CLI de IA para substituir o trabalho desta sessão.
 
-Localize o clone do **melgarafael/DeskcommCRM** e leia `CLAUDE.md` e
+Localize o clone do **josemoracruvinel/crm-saude** e leia `CLAUDE.md` e
 [`docs/runbooks/atualizar-curso.md`](../../../docs/runbooks/atualizar-curso.md) no clone antes de
 operar a bancada. A publicação do site vive em outro repositório,
 **melgarafael/deskcomm-site**. Quando instalada globalmente, resolva esses caminhos a partir
