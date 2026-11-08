@@ -8,6 +8,12 @@ Se você roda o DeskcommCRM numa VPS, **leia a seção da versão para a qual es
 
 ## [Não lançado]
 
+## [1.102.1] — 2026-11-08
+
+### Alterado
+
+- **Fluxo Care passa a ser mantido de forma independente.** As imagens e as atualizações vêm do repositório josemoracruvinel/crm-saude. O código de funcionamento é o mesmo da 1.102.0; mudam só a origem das imagens e o nome padrão do sistema.
+
 ## [1.102.0] — 2026-11-05
 
 ### Adicionado
