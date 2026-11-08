@@ -8,6 +8,12 @@ Se você roda o DeskcommCRM numa VPS, **leia a seção da versão para a qual es
 
 ## [Não lançado]
 
+## [1.103.2] — 2026-11-08
+
+### Corrigido
+
+- **A tela de atualização volta a confirmar a versão instalada.** As imagens passam a informar de qual ponto do código foram geradas, que é o que o servidor usa para confirmar a versão e liberar o botão de atualizar.
+
 ## [1.103.1] — 2026-11-08
 
 ### Alterado

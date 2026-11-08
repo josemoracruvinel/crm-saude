@@ -77,6 +77,12 @@ jobs:
           tags: ${{ env.REGISTRY }}/${{ github.repository_owner }}/${{ matrix.name }}:${{ steps.ver.outputs.value }}
           build-args: |
             APP_VERSION=${{ steps.ver.outputs.value }}
+          # O agente da VPS so confirma a versao quando a imagem diz de qual
+          # commit saiu (hostgator-setup-kit/_runtime.sh le este rotulo).
+          labels: |
+            org.opencontainers.image.revision=${{ github.sha }}
+            org.opencontainers.image.version=${{ steps.ver.outputs.value }}
+            org.opencontainers.image.source=${{ github.server_url }}/${{ github.repository }}
           cache-from: type=gha,scope=${{ matrix.name }}
           cache-to: type=gha,mode=max,scope=${{ matrix.name }}
 
