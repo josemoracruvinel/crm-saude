@@ -13,10 +13,12 @@
 #   bash hostgator-setup-kit/backup-externo.sh agendar      # instala o cron diário (03:30)
 #
 # Desenho de segurança:
-#   - A chave do B2 deve ter só listFiles/readFiles/writeFiles (SEM deleteFiles):
-#     quem invadir a VPS não consegue apagar as cópias que já saíram.
+#   - O balde tem Object Lock com retenção padrão de 30 dias: nenhuma cópia pode
+#     ser apagada nesse prazo, nem com a chave da VPS (o painel do B2 só cria
+#     chave "Read and Write", que inclui deleteFiles). Quem invadir a VPS não
+#     consegue apagar as cópias que já saíram. A chave fica restrita a este balde.
 #   - A retenção lá fora é feita pela regra de ciclo de vida do próprio balde
-#     (ex.: esconder após 30 dias, apagar 1 dia depois), não por este script.
+#     (prefixo backups/: esconder após 30 dias, apagar 1 dia depois), não por este script.
 #   - A senha da criptografia é gerada aqui e gravada em $CHAVE_LOCAL (600).
 #     SEM ELA NÃO HÁ COMO RESTAURAR: guarde uma cópia fora da VPS.
 set -euo pipefail
@@ -60,6 +62,16 @@ configurar() {
   read -r -s -p "applicationKey: " app_key; echo
   [ -n "$balde" ] && [ -n "$key_id" ] && [ -n "$app_key" ] || erro "faltou algum dado."
 
+  # Confere a chave ANTES de gravar qualquer coisa: com chave errada, nada fica
+  # meio configurado e dá para rodar "configurar" de novo.
+  local resposta
+  resposta="$(curl -s -u "$key_id:$app_key" https://api.backblazeb2.com/b2api/v3/b2_authorize_account || true)"
+  if ! printf '%s' "$resposta" | grep -q '"authorizationToken"'; then
+    unset app_key key_id resposta
+    erro "o Backblaze recusou a chave (keyID ou applicationKey não conferem). A applicationKey começa quase sempre com K00. Rode 'configurar' de novo."
+  fi
+  unset resposta
+
   rclone config create "$REMOTO_B2" b2 account "$key_id" key "$app_key" hard_delete false >/dev/null
   unset app_key key_id
 
@@ -80,7 +92,12 @@ configurar() {
   unset senha sal
   chmod 600 "$(rclone config file | tail -1)" 2>/dev/null || true
 
-  rclone lsd "${REMOTO_B2}:${balde}" >/dev/null 2>&1 || erro "a chave não conseguiu listar o balde '$balde'. Confira o nome do balde e as permissões da chave."
+  if ! rclone lsd "${REMOTO_B2}:${balde}" >/dev/null 2>&1; then
+    rclone config delete "$REMOTO_CRIPTO" >/dev/null 2>&1 || true
+    rclone config delete "$REMOTO_B2" >/dev/null 2>&1 || true
+    rm -f "$CHAVE_LOCAL"
+    erro "a chave não conseguiu listar o balde '$balde'. Confira o nome do balde e se a chave foi criada para ele. Nada ficou gravado; rode 'configurar' de novo."
+  fi
   ok "configurado. A chave da criptografia está em $CHAVE_LOCAL — copie para um lugar seguro fora da VPS."
 }
 
