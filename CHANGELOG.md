@@ -8,6 +8,17 @@ Se você roda o DeskcommCRM numa VPS, **leia a seção da versão para a qual es
 
 ## [Não lançado]
 
+## [1.103.4] — 2026-11-09
+
+### Segurança
+
+- **O site passa a pedir ao navegador que use sempre https (HSTS).** Começa com prazo curto, de 7 dias, para que um problema no https não prenda o navegador por muito tempo. Quem acessa por http://IP não é afetado.
+
+### Corrigido
+
+- **O diagnóstico do servidor (`healthcheck.sh`) não trava mais em "Saúde interna do app".** Rodado num terminal, ele ficava parado esperando o teclado e nunca terminava, mesmo com o sistema saudável.
+- **A configuração do backup externo confere a chave do Backblaze antes de gravar qualquer coisa.** Com chave errada, nada fica configurado pela metade e basta rodar `configurar` de novo.
+
 ## [1.103.3] — 2026-11-08
 
 ### Adicionado

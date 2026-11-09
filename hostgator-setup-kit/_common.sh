@@ -1994,10 +1994,15 @@ resposta_sim() {
 app_health_probe() {
   local prazo="${1:-0}" sonda
   sonda="fetch('http://127.0.0.1:3000/api/v1/health').then(r=>r.json()).then(j=>{console.log((j&&j.data&&j.data.status)||'sem_status');console.log(JSON.stringify(j))}).catch(()=>process.exit(1))"
+  # `</dev/null`: rodando num terminal, o `timeout` põe o `docker compose exec`
+  # fora do primeiro plano e ele PARA esperando ler o teclado (SIGTTIN) — o
+  # prazo nunca vence e o healthcheck trava em "Saúde interna do app". Medido
+  # na VPS (09/11/2026): sem o redirecionamento, preso indefinidamente; com
+  # ele, `healthy` em 0,27 s. A sonda não lê nada da entrada.
   if [ "$prazo" = "0" ]; then
-    dc exec -T app node -e "$sonda" 2>/dev/null || echo ''
+    dc exec -T app node -e "$sonda" </dev/null 2>/dev/null || echo ''
   else
-    com_prazo "$prazo" docker compose $(dc_files) exec -T app node -e "$sonda" 2>/dev/null || echo ''
+    com_prazo "$prazo" docker compose $(dc_files) exec -T app node -e "$sonda" </dev/null 2>/dev/null || echo ''
   fi
 }
 

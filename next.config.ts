@@ -104,6 +104,11 @@ const nextConfig: NextConfig = {
           { key: "X-Content-Type-Options", value: "nosniff" },
           { key: "X-Frame-Options", value: "DENY" },
           { key: "Referrer-Policy", value: "strict-origin-when-cross-origin" },
+          // HSTS: o navegador passa a usar só https neste domínio. Prazo curto (7 dias)
+          // de propósito, para começar: se o https quebrar, o bloqueio expira rápido.
+          // Sem includeSubDomains/preload: o domínio pode ter subdomínios de outros apps.
+          // Em http://IP o navegador ignora o cabeçalho, então não afeta essa forma de acesso.
+          { key: "Strict-Transport-Security", value: "max-age=604800" },
           // microphone=(self): o gravador de voz do composer (PTT estilo WhatsApp)
           // usa getUserMedia({audio}); microphone=() bloquearia em TODA origem,
           // inclusive a própria — daria "microphone is not allowed in this document".
