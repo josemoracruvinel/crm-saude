@@ -116,7 +116,7 @@ case "${NEXT_PUBLIC_SUPABASE_URL:-}" in
     #     de proxy e um erro de TLS aqui seria diagnóstico errado.
     molde="$(dc exec -T app node -e "
 fetch('http://127.0.0.1:3000/email-templates/confirmation').then(r=>r.text()).then(t=>{console.log(t);process.exit(0)}).catch(()=>process.exit(1))
-" 2>/dev/null || echo '')"
+" </dev/null 2>/dev/null || echo '')"
     if printf '%s' "$molde" | grep -q 'token_hash={{ .TokenHash }}'; then
       c_grn "✓ o app serve o molde em /email-templates/confirmation"
     elif [ -n "$molde" ]; then
