@@ -32,6 +32,7 @@ import type { FetchLike } from "@modelcontextprotocol/sdk/shared/transport.js";
 
 import { assertSafeOutboundUrl } from "@/lib/automation/outbound-url";
 import { assertDestinoResolvidoSeguro } from "@/lib/automation/outbound-ip";
+import { comConexaoSegura } from "@/lib/automation/conexao-segura";
 import {
   EgressBlockedError,
   allowlistedFetch,
@@ -168,7 +169,8 @@ export function fetchDeSaida(endpoint: string | readonly string[], guarda?: Guar
     if (host === null || !allowlist.has(host)) throw new EgressBlockedError(host ?? "unparseable");
     // `hostOf` traz a PORTA (é o que a allowlist usa); o DNS quer só o nome.
     await conferirIp(new URL(url).hostname);
-    return allowlistedFetch(url, { ...init, redirect: "manual" }, {
+    // `comConexaoSegura`: o IP é julgado também na conexão (fecha o rebinding).
+    return allowlistedFetch(url, comConexaoSegura({ ...init, redirect: "manual" }), {
       allowlist,
       ...(guarda?.fetchImpl ? { fetchImpl: guarda.fetchImpl } : {}),
     });

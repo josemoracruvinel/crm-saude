@@ -41,6 +41,7 @@ import { zernioTemplateOps } from "../zernio/templates";
 import { zernioReportConversion } from "../zernio/conversoes";
 import { parametrosDoParceiro } from "../zernio/parametros-do-modelo";
 import type { TemplateContract } from "../meta/template-contract";
+import { comConexaoSegura } from "@/lib/automation/conexao-segura";
 import { assertDestinoResolvidoSeguro } from "@/lib/automation/outbound-ip";
 import { assertSafeOutboundUrl } from "@/lib/automation/outbound-url";
 import { zernioMediaFetchInit } from "../zernio/webhook";
@@ -359,7 +360,7 @@ export const zernioAdapter: ChannelAdapter = {
     assertSafeOutboundUrl(input.url);
     await assertDestinoResolvidoSeguro(new URL(input.url).hostname);
 
-    const res = await fetch(input.url, zernioMediaFetchInit(creds.apiKey));
+    const res = await fetch(input.url, comConexaoSegura(zernioMediaFetchInit(creds.apiKey)));
     if (!res.ok) {
       // 400 costuma ser mídia já descartada pela plataforma, e 401 credencial —
       // desfechos diferentes, e o status no erro é o que distingue os dois para

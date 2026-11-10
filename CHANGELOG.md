@@ -8,6 +8,12 @@ Se você roda o DeskcommCRM numa VPS, **leia a seção da versão para a qual es
 
 ## [Não lançado]
 
+## [1.103.7] — 2026-11-10
+
+### Segurança
+
+- **Webhooks, mídia de canais sociais, servidores MCP externos e a leitura de sites da prospecção conferem o endereço no instante da conexão.** Antes o endereço era conferido e só depois conectado, e um DNS mal-intencionado podia trocar a resposta no meio do caminho para alcançar a rede interna do servidor (DNS rebinding). Sites e serviços externos legítimos funcionam como antes.
+
 ## [1.103.6] — 2026-11-10
 
 ### Segurança

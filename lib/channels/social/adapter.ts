@@ -2,6 +2,7 @@ import { MAX_MEDIA_BYTES, MediaTooLargeError } from "@/lib/messaging/media/types
 import { z } from "zod";
 import { assertSafeOutboundUrl } from "@/lib/automation/outbound-url";
 import { assertDestinoResolvidoSeguro } from "@/lib/automation/outbound-ip";
+import { comConexaoSegura } from "@/lib/automation/conexao-segura";
 import { zernioBaseUrl } from "../zernio/credentials";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { zernioAdapter } from "../adapters/zernio";
@@ -61,11 +62,14 @@ export const socialAdapter: ChannelAdapter = {
     // Only the provider's own media endpoint receives its API key, never a CDN or redirect.
     const providerMedia =
       url.origin === new URL(zernioBaseUrl()).origin && url.pathname.startsWith("/api/v1/");
-    const response = await fetch(url, {
-      redirect: "error",
-      signal: AbortSignal.timeout(15_000),
-      headers: providerMedia ? { Authorization: `Bearer ${creds.apiKey}` } : {},
-    });
+    const response = await fetch(
+      url,
+      comConexaoSegura({
+        redirect: "error",
+        signal: AbortSignal.timeout(15_000),
+        headers: providerMedia ? { Authorization: `Bearer ${creds.apiKey}` } : {},
+      }),
+    );
     if (!response.ok) throw new Error(`Falha ao baixar mídia (HTTP ${response.status}).`);
     if (Number(response.headers.get("content-length") ?? 0) > MAX_MEDIA_BYTES) {
       await response.body?.cancel();

@@ -85,12 +85,13 @@ export function ipEhEspecial(ip: string): boolean {
  * é a assinatura do rebinding — o `fetch` pode escolher o privado, e não temos
  * como saber qual ele pegou.
  *
- * Isto REDUZ muito a janela do rebinding, mas não a fecha por completo: entre
- * esta resolução e a do `fetch` existe um intervalo em que o DNS pode mudar de
- * resposta. Fechar de vez exige fixar o IP na conexão (agente com `lookup`
- * próprio), o que muda o SNI/Host e quebra TLS com vários destinos legítimos.
- * A janela residual está declarada aqui de propósito, para o próximo leitor não
- * precisar descobrir sozinho — que foi exatamente como este arquivo nasceu.
+ * Sozinho, isto REDUZ a janela do rebinding mas não a fecha: entre esta
+ * resolução e a do `fetch` o DNS pode mudar de resposta. Quem fecha é
+ * `comConexaoSegura` (conexao-segura.ts), que repete este julgamento no
+ * `lookup` do próprio socket — sem mexer em SNI/Host, então TLS segue intacto.
+ * Os chamadores que conectam por conta própria usam os dois; os que só
+ * repassam a URL a outro serviço (ex.: mídia entregue ao gateway) ficam com
+ * este pré-check, porque quem conecta ali é o outro serviço.
  */
 export async function assertDestinoResolvidoSeguro(hostname: string): Promise<void> {
   // Literal de IP não passa por DNS: julga direto.

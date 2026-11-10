@@ -48,6 +48,7 @@ import {
   semTags,
   temLinkComHrefHttp,
 } from "@/lib/prospecting/leitura-do-html";
+import { comConexaoSegura } from "@/lib/automation/conexao-segura";
 import { LIMITE_TENTATIVAS } from "@/lib/prospecting/site-efetivo";
 
 const TIMEOUT_MS = 8000;
@@ -228,11 +229,15 @@ async function buscar(
   for (let salto = 0; salto <= MAX_REDIRECTS; salto++) {
     const bloqueio = await hostLiberado(atual, verificar);
     if (bloqueio) throw Object.assign(new Error(bloqueio), { bloqueioSSRF: bloqueio });
-    const res = await fetchFn(atual, {
-      redirect: "manual",
-      signal: AbortSignal.timeout(TIMEOUT_MS),
-      headers: { "User-Agent": UA_NAVEGADOR },
-    });
+    // `comConexaoSegura`: o IP é julgado também na conexão (fecha o rebinding).
+    const res = await fetchFn(
+      atual,
+      comConexaoSegura({
+        redirect: "manual",
+        signal: AbortSignal.timeout(TIMEOUT_MS),
+        headers: { "User-Agent": UA_NAVEGADOR },
+      }),
+    );
     const destino = res.headers.get("location");
     if (res.status >= 300 && res.status < 400 && destino) {
       await res.body?.cancel().catch(() => undefined);

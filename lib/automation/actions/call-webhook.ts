@@ -24,6 +24,7 @@ import { createHash, createHmac } from "node:crypto";
 import { z } from "zod";
 import { registerAction } from "@/lib/automation/actions";
 import type { ActionCtx, ActionResultDetail } from "@/lib/automation/types";
+import { comConexaoSegura } from "@/lib/automation/conexao-segura";
 import { assertDestinoResolvidoSeguro } from "@/lib/automation/outbound-ip";
 import { assertSafeOutboundUrl } from "@/lib/automation/outbound-url";
 import { mensagemDeErro } from "@/lib/automation/actions/erro-legivel";
@@ -471,13 +472,16 @@ export async function executeCallWebhook(
       // segue redirect, e uma URL de tenant que passou no guard anti-SSRF pode
       // 302 pra um endpoint interno (ex.: http://169.254.169.254/...). Um 3xx
       // vira falha comum (conta pro retry), nunca é seguido.
-      const res = await fetch(url, {
+      const init: RequestInit = {
         method: "POST",
         headers: headersDaTentativa,
         body,
         redirect: "manual",
         signal: AbortSignal.timeout(TIMEOUT_MS),
-      });
+      };
+      // O IP é julgado também NA CONEXÃO (fecha o rebinding). Destino interno
+      // autorizado (`skipUrlCheck`) vai sem isso, senão seria recusado.
+      const res = await fetch(url, opts.skipUrlCheck ? init : comConexaoSegura(init));
       lastStatus = res.status;
       if (res.ok) {
         return {
