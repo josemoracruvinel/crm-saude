@@ -7,6 +7,22 @@ import type { NextConfig } from "next";
  *  - INP < 200ms p75
  *  - Initial bundle /app/inbox < 250KB gzipped
  */
+/** Política de conteúdo em modo só-observar (ver o cabeçalho em `headers()`). */
+const CSP_SO_OBSERVAR = [
+  "default-src 'self'",
+  "script-src 'self' 'unsafe-inline'",
+  "style-src 'self' 'unsafe-inline'",
+  "img-src 'self' data: blob: https:",
+  "media-src 'self' data: blob: https:",
+  "font-src 'self' data:",
+  "connect-src 'self' https: wss:",
+  "frame-src 'self' https:",
+  "worker-src 'self' blob:",
+  "object-src 'none'",
+  "base-uri 'self'",
+  "form-action 'self'",
+].join("; ");
+
 const nextConfig: NextConfig = {
   // Self-host: gera .next/standalone pro container Docker (node server.js) — é
   // o que o estágio `runner` do Dockerfile copia, então é o modo de build deste
@@ -109,6 +125,12 @@ const nextConfig: NextConfig = {
           // Sem includeSubDomains/preload: o domínio pode ter subdomínios de outros apps.
           // Em http://IP o navegador ignora o cabeçalho, então não afeta essa forma de acesso.
           { key: "Strict-Transport-Security", value: "max-age=604800" },
+          // CSP em modo SÓ-OBSERVAR (auditoria Fluxo Care): o navegador não bloqueia
+          // nada, só anota no console o que esta política barraria. Depois de
+          // conferir as telas sem avisos, troca-se o nome para
+          // "Content-Security-Policy" (aí sim bloqueia). 'unsafe-inline' em script
+          // é exigido pelos scripts embutidos do Next sem nonce.
+          { key: "Content-Security-Policy-Report-Only", value: CSP_SO_OBSERVAR },
           // microphone=(self): o gravador de voz do composer (PTT estilo WhatsApp)
           // usa getUserMedia({audio}); microphone=() bloquearia em TODA origem,
           // inclusive a própria — daria "microphone is not allowed in this document".

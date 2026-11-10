@@ -8,6 +8,14 @@ Se você roda o DeskcommCRM numa VPS, **leia a seção da versão para a qual es
 
 ## [Não lançado]
 
+## [1.103.6] — 2026-11-10
+
+### Segurança
+
+- **O processo de tarefas de fundo (worker) não roda mais com poder total (root) no servidor.** Ele passa a usar um usuário comum. O funcionamento é o mesmo: ele só grava na pasta temporária.
+- **Política de segurança do navegador (CSP) em modo só-observar.** O navegador não bloqueia nada; só anota no console o que a política barraria, para ajustar antes de ligar de verdade.
+- **Teste novo vigia as rotas que usam acesso total ao banco.** Toda rota assim precisa filtrar pela organização; as exceções (crons, painel da instalação) ficam listadas com o motivo.
+
 ## [1.103.5] — 2026-11-10
 
 ### Segurança

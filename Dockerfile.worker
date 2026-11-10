@@ -38,4 +38,10 @@ EXPOSE 8787
 # drena os jobs em curso e sai 0. Não é conserto de prazo: nenhum timeout de
 # supervisor, healthcheck ou stop_grace_period mudou (a issue #2823 proíbe o
 # aumento de timeout como único remédio).
+#
+# Sem root (auditoria Fluxo Care): `node` (uid 1000) já existe na imagem base.
+# O worker não usa volume e só grava em os.tmpdir() (/tmp, aberto a todos) —
+# derivação de vídeo e transcodificação de voz. O código em /app fica do root,
+# só para leitura, que é o que o worker precisa.
+USER node
 CMD ["node", "--import", "tsx", "workers/agent-worker/main.ts"]
