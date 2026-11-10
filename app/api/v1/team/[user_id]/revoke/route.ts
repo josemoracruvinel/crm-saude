@@ -95,6 +95,33 @@ export async function POST(
     .eq("id", target.id);
   if (updErr) return fail("internal_error", updErr.message, 500, { requestId });
 
+  // Conferência DEPOIS da escrita (auditoria Fluxo Care, achado 7): a contagem
+  // acima e o UPDATE não são atômicos. Uma revogação simultânea a um
+  // rebaixamento podia deixar a organização sem admin ativo. Recontamos já com
+  // a revogação feita; se não sobrou admin, desfazemos antes de qualquer efeito
+  // colateral da rota (push, auditoria) e devolvemos o mesmo 409.
+  if (target.role === "admin") {
+    const { count: depois, error: depoisErr } = await supabase
+      .from("user_organizations")
+      .select("id", { count: "exact", head: true })
+      .eq("organization_id", activeOrg.orgId)
+      .eq("role", "admin")
+      .is("revoked_at", null);
+    if (!depoisErr && (depois ?? 0) < 1) {
+      await supabase
+        .from("user_organizations")
+        .update({ revoked_at: null, updated_at: new Date().toISOString() })
+        .eq("id", target.id);
+      invalidarUsuario(targetUserId);
+      return fail(
+        "state_conflict",
+        t("Não é possível revogar o último admin do tenant."),
+        409,
+        { requestId },
+      );
+    }
+  }
+
   // #3696: acesso REVOGADO não pode sobreviver ao cache curto. A próxima
   // requisição da pessoa já nega — é o caso que
   // `tests/unit/acesso-revogado-nao-espera-o-cache.test.ts` trava.

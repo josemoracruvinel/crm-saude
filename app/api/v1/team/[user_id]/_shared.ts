@@ -90,6 +90,35 @@ export async function changeMemberRole(
     .eq("id", target.id);
   if (updErr) return fail("internal_error", updErr.message, 500, { requestId });
 
+  // Conferência DEPOIS da escrita (auditoria Fluxo Care, achado 7). A contagem
+  // acima e o UPDATE não são atômicos: dois rebaixamentos simultâneos — ou um
+  // rebaixamento junto com uma revogação — podiam ler "2 admins" cada um e
+  // deixar a organização sem nenhum. Aqui recontamos já com a nossa escrita
+  // feita; se não sobrou admin ativo, desfazemos e devolvemos o mesmo 409.
+  // Nas duas pontas de uma corrida, quem conferir por último desfaz; o pior
+  // caso é as duas desfazerem (ninguém rebaixado), nunca a org sem admin.
+  if (target.role === "admin" && input.role !== "admin") {
+    const { count: depois, error: depoisErr } = await supabase
+      .from("user_organizations")
+      .select("id", { count: "exact", head: true })
+      .eq("organization_id", activeOrg.orgId)
+      .eq("role", "admin")
+      .is("revoked_at", null);
+    if (!depoisErr && (depois ?? 0) < 1) {
+      await supabase
+        .from("user_organizations")
+        .update({ role: target.role, updated_at: new Date().toISOString() })
+        .eq("id", target.id);
+      invalidarUsuario(targetUserId);
+      return fail(
+        "state_conflict",
+        t("Não é possível rebaixar o último admin do tenant."),
+        409,
+        { requestId },
+      );
+    }
+  }
+
   // #3696: papel novo vale a partir da PRÓXIMA requisição. Sem isto, uma
   // promoção (ou um rebaixamento) ficaria até 30 s atrás do cache.
   invalidarUsuario(targetUserId);

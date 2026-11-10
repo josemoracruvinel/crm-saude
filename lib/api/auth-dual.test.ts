@@ -180,7 +180,18 @@ describe("os caminhos de envio passam pelo proxy", () => {
     expect(isPublicPath("/api/v1/messages")).toBe(true);
     expect(isPublicPath("/api/v1/conversations/open-with-contact")).toBe(true);
     // Mídia: sem ela o cartão de fidelidade não sai depois do corte.
-    expect(isPublicPath("/api/v1/conversations/abc-123/media")).toBe(true);
+    expect(
+      isPublicPath("/api/v1/conversations/5b0f3c1e-8a2d-4c6f-9e1a-0d2b4c6e8f10/media"),
+    ).toBe(true);
+    expect(
+      isPublicPath("/api/v1/conversations/5b0f3c1e-8a2d-4c6f-9e1a-0d2b4c6e8f10/drafts"),
+    ).toBe(true);
+  });
+
+  it("o id da conversa precisa ter forma de UUID (irmãos literais não pegam carona)", () => {
+    expect(isPublicPath("/api/v1/conversations/abc-123/media")).toBe(false);
+    expect(isPublicPath("/api/v1/conversations/bulk/media")).toBe(false);
+    expect(isPublicPath("/api/v1/conversations/counts/drafts")).toBe(false);
   });
 
   it("libera as rotas de configuração de IA/follow-up/agenda (issue #1875)", () => {

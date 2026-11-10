@@ -52,12 +52,19 @@ interface MockBancoOpts {
   membro: unknown;
   conversasAbertas?: Array<{ id: string; contact_id: string | null }>;
   adminCount?: number;
+  /** Contagem vista na conferência DEPOIS da revogação (corrida). Padrão: a mesma de antes. */
+  adminCountDepois?: number;
 }
+
+let updates: Array<Record<string, unknown>> = [];
 
 function mockBanco(opts: MockBancoOpts) {
   ultimoUpdate = null;
+  updates = [];
+  let contagens = 0;
   const update = vi.fn((valores: Record<string, unknown>) => {
     ultimoUpdate = valores;
+    updates.push(valores);
     return { eq: vi.fn(async () => ({ error: null })) };
   });
 
@@ -80,7 +87,13 @@ function mockBanco(opts: MockBancoOpts) {
             return {
               eq: () => ({
                 eq: () => ({
-                  is: async () => ({ count: opts.adminCount ?? 2, error: null }),
+                  is: async () => ({
+                    count:
+                      contagens++ === 0
+                        ? (opts.adminCount ?? 2)
+                        : (opts.adminCountDepois ?? opts.adminCount ?? 2),
+                    error: null,
+                  }),
                 }),
               }),
             };
@@ -245,5 +258,25 @@ describe("revogar membro", () => {
 
     const res = await POST(pedido(), ctx);
     expect(res.status).toBe(409);
+  });
+
+  it("corrida: a conferência depois da revogação vê 0 admins → desfaz, 409, sem efeitos", async () => {
+    mockBanco({
+      membro: { id: "m1", user_id: ALVO, role: "admin", revoked_at: null },
+      adminCount: 2,
+      adminCountDepois: 0,
+    });
+    const { POST } = await import("./route");
+
+    const res = await POST(pedido(), ctx);
+    expect(res.status).toBe(409);
+    expect(updates).toHaveLength(2);
+    expect(updates[0]).toHaveProperty("revoked_at");
+    expect(updates[0].revoked_at).not.toBeNull();
+    expect(updates[1]).toMatchObject({ revoked_at: null });
+    expect(pushApagado).toBeNull();
+    expect(audit).not.toHaveBeenCalledWith(
+      expect.objectContaining({ action: "member.revoked" }),
+    );
   });
 });

@@ -8,6 +8,17 @@ Se você roda o DeskcommCRM numa VPS, **leia a seção da versão para a qual es
 
 ## [Não lançado]
 
+## [1.103.5] — 2026-11-10
+
+### Segurança
+
+- **A organização não fica mais sem administrador por duas ações ao mesmo tempo.** Se dois administradores fossem rebaixados ou removidos no mesmo instante, a organização podia ficar sem nenhum. Agora o sistema confere de novo logo depois da mudança e a desfaz, com o mesmo aviso de antes.
+- **Dois endereços usados por integrações só aceitam o número de conversa no formato certo.** Envio de mídia e rascunhos não abrem mais a porta para endereços vizinhos. Nenhuma tela muda.
+
+### Corrigido
+
+- **O diagnóstico do servidor (`healthcheck.sh`) também não trava na conferência do modelo de e-mail.**
+
 ## [1.103.4] — 2026-11-09
 
 ### Segurança

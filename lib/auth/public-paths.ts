@@ -156,11 +156,15 @@ export const PUBLIC_PATHS: RegExp[] = [
   // resolvida por `lib/api/auth-dual.ts` DENTRO da rota
   // (`app/api/v1/conversations/[id]/drafts/route.ts`). O `GET`/leitura do
   // rascunho é da sessão do atendente (caixa de entrada) e NÃO entra aqui.
-  /^\/api\/v1\/conversations\/[^/]+\/drafts$/,
+  //
+  // O segmento é FORMA DE UUID, nunca `[^/]+` (auditoria Fluxo Care, achado 11):
+  // `/api/v1/conversations/` tem irmãos literais (`bulk`, `counts`,
+  // `open-with-contact`) que um padrão largo alcançaria por engano.
+  /^\/api\/v1\/conversations\/[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}\/drafts$/i,
   // Upload outbound: primeiro passo do envio de MÍDIA por token. Sem ele, o
   // cartão de fidelidade (a única das automações que não é texto) não teria
-  // como sair depois do corte de gateway.
-  /^\/api\/v1\/conversations\/[^/]+\/media$/,
+  // como sair depois do corte de gateway. Mesmo segmento em forma de UUID.
+  /^\/api\/v1\/conversations\/[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}\/media$/i,
   // CONFIGURAÇÃO DE IA, FOLLOW-UP E AGENDA SERVER-TO-SERVER (issue #1875).
   // Mesma dualidade das linhas acima: sessão OU Bearer `dsk_…`, resolvidos por
   // `lib/api/auth-dual.ts` DENTRO de cada rota (a org sai da linha do token e

@@ -39,20 +39,27 @@ const ORG_ID = "22222222-2222-4222-8222-222222222222";
 interface StubState {
   target: { id: string; user_id: string; role: string; revoked_at: string | null } | null;
   adminCount: number;
+  /** Contagem vista na conferência DEPOIS da escrita (corrida). Padrão: adminCount - 1. */
+  adminCountDepois?: number;
   updates: Array<Record<string, unknown>>;
 }
 
-/** Stub PostgREST cobrindo as 3 queries da rota (fetch, count de admins, update). */
+/** Stub PostgREST cobrindo as queries da rota (fetch, counts de admins antes/depois, updates). */
 function makeSupabaseStub(state: StubState) {
+  let contagens = 0;
   return {
     from: (table: string) => {
       if (table !== "user_organizations") throw new Error(`unexpected table ${table}`);
       return {
         select: (_cols: string, opts?: { count?: string; head?: boolean }) => {
           if (opts?.count) {
+            const n =
+              contagens++ === 0
+                ? state.adminCount
+                : (state.adminCountDepois ?? Math.max(state.adminCount - 1, 0));
             const chain = {
               eq: () => chain,
-              is: () => Promise.resolve({ count: state.adminCount, error: null }),
+              is: () => Promise.resolve({ count: n, error: null }),
             };
             return chain;
           }
@@ -140,6 +147,24 @@ describe("PATCH /api/v1/team/[user_id] — guard de último admin", () => {
     expect(body.data).toMatchObject({ user_id: TARGET_ID, role: "manager" });
     expect(state.updates).toHaveLength(1);
     expect(state.updates[0]).toMatchObject({ role: "manager" });
+  });
+
+  it("corrida: a conferência depois da escrita vê 0 admins → desfaz e devolve 409", async () => {
+    // Antes da escrita havia 2 admins; outra requisição simultânea rebaixou o
+    // outro, então depois da nossa escrita não sobrou nenhum.
+    const state = stubState({ adminCount: 2, adminCountDepois: 0 });
+    adminSession(state);
+    const { PATCH } = await import("@/app/api/v1/team/[user_id]/route");
+    const res = await PATCH(patchReq("agent"), params);
+    expect(res.status).toBe(409);
+    const body = (await res.json()) as { error: { code: string } };
+    expect(body.error.code).toBe("state_conflict");
+    expect(state.updates).toHaveLength(2);
+    expect(state.updates[0]).toMatchObject({ role: "agent" });
+    expect(state.updates[1]).toMatchObject({ role: "admin" });
+    expect(
+      vi.mocked(audit).mock.calls.some(([e]) => e.action === "team.role_changed"),
+    ).toBe(false);
   });
 });
 
