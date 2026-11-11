@@ -145,9 +145,16 @@ check "sai com rc 0" igual "$RC_VAZIO" 0
 check "imprime '✓ banco restaurado'" contem "$WORK/vazio.txt" "✓ banco restaurado"
 check "o dublê emitiu o erro de schema do dump real" contem "$WORK/vazio.txt" 'schema "auth" already exists'
 check "o dublê emitiu o erro de extensão do dump real" contem "$WORK/vazio.txt" 'extension "pg_net" is not available'
-check "o psql não recebe ON_ERROR_STOP=1 (sem ela ele segue e sai 0)" nao_contem "$DUBLE_LOG" "ON_ERROR_STOP"
+# As 2 chamadas que recolocam as chaves mestras (`private.app_secrets`, que o
+# backup.sh não leva) são outra operação: um INSERT por chave, pelo
+# `psql_run` do kit, onde ON_ERROR_STOP é o certo. As provas da CARGA do dump
+# olham só as outras.
+grep -v 'app_secrets' "$DUBLE_LOG" > "$WORK/carga.log"
+check "o psql não recebe ON_ERROR_STOP=1 (sem ela ele segue e sai 0)" nao_contem "$WORK/carga.log" "ON_ERROR_STOP"
 check "o psql do restore foi chamado (4 chamadas: checagem + restore + as 2 da conferência)" \
-  igual "$(grep -c 'psql' "$DUBLE_LOG")" 4
+  igual "$(grep -c 'psql' "$WORK/carga.log")" 4
+check "as 2 chaves mestras são recolocadas a partir do .env (o backup não as leva)" \
+  igual "$(grep -c 'app_secrets' "$DUBLE_LOG")" 2
 check "a conferência do resultado fechou e nomeia o que foi medido" \
   contem "$WORK/vazio.txt" "1 tabela(s) de public/auth.users conferidas contra os COPY do dump (1 linha(s))"
 

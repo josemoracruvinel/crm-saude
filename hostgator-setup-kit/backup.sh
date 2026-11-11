@@ -36,7 +36,13 @@ step "Dump do banco → $BACKUP_DIR/db-$ts.sql.gz"
 #   2. o pipe sai com zero mas o arquivo não se lê: `gzip -t` percorre o arquivo
 #      inteiro e confere o CRC. BACKUP QUE NINGUÉM CONSEGUE LER NÃO É BACKUP.
 parcial_db="$BACKUP_DIR/.db-$ts.sql.gz.parcial"
+# Sem a CÓPIA das chaves mestras (`private.app_secrets`): os dados cifrados
+# (CPF, credenciais, segredos de webhook) e a chave que os abre não viajam no
+# mesmo arquivo. A estrutura da tabela continua no dump; só as linhas ficam de
+# fora. As chaves moram no .env, e o restore.sh as recoloca de lá
+# (`ensure_encryption_key`), como já fazem o install.sh e o update.sh.
 if ! pg_container postgres:17-alpine pg_dump "$(url_do_schema)" --no-owner --no-privileges \
+     --exclude-table-data=private.app_secrets \
      | gzip > "$parcial_db"; then
   rm -f "$parcial_db"
   die "o dump do banco falhou no meio (disco cheio? pg_dump interrompido?) — removi o arquivo incompleto. Sem backup válido, não siga com atualização."

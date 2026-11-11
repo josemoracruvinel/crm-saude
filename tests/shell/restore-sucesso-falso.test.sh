@@ -213,8 +213,12 @@ check "anuncia a conferência do resultado, com as tabelas e as linhas medidas" 
 # update.sh passa ao psql do baseline. Restaurar por outra conta (o
 # `supabase_admin` de antes) devolvia as tabelas e funções de `public` com outro
 # dono, e a atualização seguinte não reaplicava o banco (2.714 `must be owner`).
+# (As 2 chamadas que recolocam as chaves mestras — `app_secrets` — ficam fora
+# desta conta e têm a prova própria logo abaixo.)
 check "a checagem, o restore e a conferência usam a conta da atualização (postgres)" \
-  igual "$(grep -c 'psql postgresql://postgres:' "$DUBLE_LOG")" 4
+  igual "$(grep -v 'app_secrets' "$DUBLE_LOG" | grep -c 'psql postgresql://postgres:')" 4
+check "as chaves mestras também são recolocadas pela conta da atualização (postgres)" \
+  igual "$(grep 'app_secrets' "$DUBLE_LOG" | grep -c 'psql postgresql://postgres:')" 2
 check "nenhum psql pela conexão de supabase_admin (o dono errado que a suíte prendia)" \
   igual "$(grep -c 'supabase_admin' "$DUBLE_LOG")" 0
 check "a conta usada é a mesma que o update.sh passa ao psql do baseline" \

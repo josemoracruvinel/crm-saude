@@ -8,6 +8,16 @@ Se você roda o DeskcommCRM numa VPS, **leia a seção da versão para a qual es
 
 ## [Não lançado]
 
+## [1.103.8] — 2026-11-10
+
+### Segurança
+
+- **O backup do banco não leva mais a cópia das chaves mestras de criptografia.** Os dados cifrados (CPF, credenciais de integrações, segredos de webhook) e a chave que os abre deixam de viajar no mesmo arquivo. As chaves continuam no `.env` do servidor.
+
+### ⚠️ Requer atenção
+
+- **Guarde fora do servidor as duas chaves mestras** (`NUVEMSHOP_OAUTH_ENCRYPTION_KEY` e `CPF_ENCRYPTION_KEY`, no `.env`). Ao restaurar um backup, o `restore.sh` as recoloca a partir do `.env`; sem as chaves originais, os dados cifrados do backup não abrem. O `restore.sh` avisa quando o `.env` não as tem.
+
 ## [1.103.7] — 2026-11-10
 
 ### Segurança

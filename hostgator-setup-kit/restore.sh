@@ -266,6 +266,25 @@ if [ "${erros_impressos:-0}" -gt 0 ]; then
 fi
 c_grn "✓ banco restaurado — $tabelas_conferidas tabela(s) de public/auth.users conferidas contra os COPY do dump ($linhas_conferidas linha(s))"
 
+# Chaves mestras: o backup.sh não leva a cópia de `private.app_secrets` (os
+# dados cifrados e a chave que os abre não viajam juntos). Elas voltam do .env,
+# pelo mesmo `ensure_encryption_key` do install.sh e do update.sh. Se o .env não
+# as tiver, a função GERA chaves novas — e os dados cifrados do backup (CPF,
+# credenciais, segredos de webhook) não abrem com elas. Por isso o aviso alto.
+step "Recolocando as chaves de cifra a partir do .env"
+chave_faltando=0
+for var_chave in NUVEMSHOP_OAUTH_ENCRYPTION_KEY CPF_ENCRYPTION_KEY; do
+  if ! grep -qE "^${var_chave}=.+" .env 2>/dev/null; then
+    chave_faltando=1
+    c_ylw "⚠ O .env não tem ${var_chave}. Uma chave NOVA será gerada, e os dados cifrados deste backup não abrirão com ela."
+  fi
+done
+if [ "$chave_faltando" = "1" ]; then
+  c_ylw "  Se você guardou as chaves originais, ponha-as no .env (substituindo as geradas) e rode:"
+  c_ylw "  bash -c 'source hostgator-setup-kit/_common.sh && enter_project && ensure_encryption_key .env'"
+fi
+ensure_encryption_key .env
+
 # Restaura o estado das sessões do WhatsApp (WAHA) se o snapshot emparelhado existir
 if [ -f "$WAHA_TAR" ]; then
   step "Restaurando sessões do WhatsApp de $WAHA_TAR"
