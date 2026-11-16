@@ -7,8 +7,8 @@ import type { NextConfig } from "next";
  *  - INP < 200ms p75
  *  - Initial bundle /app/inbox < 250KB gzipped
  */
-/** Política de conteúdo em modo só-observar (ver o cabeçalho em `headers()`). */
-const CSP_SO_OBSERVAR = [
+/** Política de conteúdo, bloqueando desde a 1.103.9 (ver o cabeçalho em `headers()`). */
+const CSP = [
   "default-src 'self'",
   "script-src 'self' 'unsafe-inline'",
   "style-src 'self' 'unsafe-inline'",
@@ -120,17 +120,18 @@ const nextConfig: NextConfig = {
           { key: "X-Content-Type-Options", value: "nosniff" },
           { key: "X-Frame-Options", value: "DENY" },
           { key: "Referrer-Policy", value: "strict-origin-when-cross-origin" },
-          // HSTS: o navegador passa a usar só https neste domínio. Prazo curto (7 dias)
-          // de propósito, para começar: se o https quebrar, o bloqueio expira rápido.
+          // HSTS: o navegador passa a usar só https neste domínio, por 1 ano (era 7
+          // dias de propósito na 1.103.4, para começar; o https está estável desde então).
           // Sem includeSubDomains/preload: o domínio pode ter subdomínios de outros apps.
           // Em http://IP o navegador ignora o cabeçalho, então não afeta essa forma de acesso.
-          { key: "Strict-Transport-Security", value: "max-age=604800" },
-          // CSP em modo SÓ-OBSERVAR (auditoria Fluxo Care): o navegador não bloqueia
-          // nada, só anota no console o que esta política barraria. Depois de
-          // conferir as telas sem avisos, troca-se o nome para
-          // "Content-Security-Policy" (aí sim bloqueia). 'unsafe-inline' em script
-          // é exigido pelos scripts embutidos do Next sem nonce.
-          { key: "Content-Security-Policy-Report-Only", value: CSP_SO_OBSERVAR },
+          { key: "Strict-Transport-Security", value: "max-age=31536000" },
+          // CSP BLOQUEANDO desde a 1.103.9. Ficou em só-observar da 1.103.6 à 1.103.8;
+          // em 16/11/2026 27 telas (menu, configurações e admin) foram conferidas no
+          // navegador e o único aviso era `eval` de duas bibliotecas que só TESTAM se
+          // podem usá-lo (Zod: try { Function("") }; detecção do objeto global, que
+          // nunca chega ao Function nos navegadores atuais) — bloqueado, elas seguem
+          // sem ele. 'unsafe-inline' em script é exigido pelo Next sem nonce.
+          { key: "Content-Security-Policy", value: CSP },
           // microphone=(self): o gravador de voz do composer (PTT estilo WhatsApp)
           // usa getUserMedia({audio}); microphone=() bloquearia em TODA origem,
           // inclusive a própria — daria "microphone is not allowed in this document".

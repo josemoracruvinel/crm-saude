@@ -8,6 +8,13 @@ Se você roda o DeskcommCRM numa VPS, **leia a seção da versão para a qual es
 
 ## [Não lançado]
 
+## [1.103.9] — 2026-11-16
+
+### Segurança
+
+- **A política de conteúdo do navegador passa a bloquear.** Até aqui ela só anotava o que barraria; agora o navegador recusa scripts de fora do próprio sistema, o que corta a maior parte dos ataques por código injetado. Todas as telas foram conferidas antes: nada do que funciona hoje é bloqueado.
+- **O navegador passa a lembrar por 1 ano que o sistema só abre em https** (eram 7 dias).
+
 ## [1.103.8] — 2026-11-10
 
 ### Segurança
