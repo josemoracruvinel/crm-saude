@@ -48,6 +48,13 @@ const ORDEM: readonly {
     titulo: "WhatsApp",
     resumo: "As senhas que ligam o sistema ao programa que conecta o WhatsApp.",
   },
+  {
+    // Fluxo Care: o prontuário é um app separado; o item "Prontuário" do menu
+    // leva ao endereço gravado aqui.
+    grupo: "prontuario",
+    titulo: "Prontuário",
+    resumo: "Para onde o item Prontuário do menu leva.",
+  },
   { grupo: "banco", titulo: "Banco de dados", resumo: "Onde ficam todos os seus dados." },
   { grupo: "fila", titulo: "Fila de tarefas", resumo: "Controla o ritmo dos envios." },
   {

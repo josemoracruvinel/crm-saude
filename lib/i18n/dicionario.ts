@@ -2018,6 +2018,9 @@ export const DICIONARIO: Traducoes = {
   "Respostas rápidas": { es: "Respuestas rápidas" },
   // Fluxo Care: a porta do prontuário no menu (app/app/prontuario).
   "Prontuário": { es: "Historia clínica" },
+  "Para onde o item Prontuário do menu leva.": {
+    es: "Adónde lleva el elemento Historia clínica del menú.",
+  },
   "O prontuário eletrônico: pacientes, atendimentos, receitas e teleconsultas.": {
     es: "La historia clínica electrónica: pacientes, consultas, recetas y teleconsultas.",
   },

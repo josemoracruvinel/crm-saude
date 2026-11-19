@@ -31,7 +31,9 @@ export type GrupoDaInstalacao =
   | "fila"
   | "seguranca"
   | "retencao"
-  | "integracao";
+  | "integracao"
+  // Fluxo Care: o endereço do prontuário (app separado), em Admin › Credenciais.
+  | "prontuario";
 
 export type NaturezaDoValor = "segredo" | "texto" | "numero" | "liga_desliga";
 
@@ -168,7 +170,9 @@ export const CATALOGO_DA_INSTALACAO: readonly ChaveDaInstalacao[] = [
     rotulo: "Endereço do prontuário",
     explicacao:
       "O endereço do prontuário eletrônico (começa com https://). O item Prontuário do menu leva até ele. Vazio, o item avisa que o prontuário não está ligado.",
-    grupo: "integracao",
+    // Grupo próprio: "integracao" é o das chaves de cobrança, que a tela
+    // Credenciais não mostra (elas se editam em Cobrança).
+    grupo: "prontuario",
     natureza: "texto",
     controle: "edita",
   },
