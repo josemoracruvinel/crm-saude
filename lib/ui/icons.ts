@@ -39,6 +39,8 @@ export {
   // Evolução da IA), e um terceiro gráfico deixaria as três linhas do menu
   // indistinguíveis de relance. Mesma família Phosphor, mesmo peso.
   Megaphone,
+  // Fluxo Care: a porta do prontuário (app separado) no grupo Atendimento.
+  Stethoscope,
   // health dashboard
   WifiHigh,
   Brain,

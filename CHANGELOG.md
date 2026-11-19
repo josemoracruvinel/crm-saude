@@ -8,6 +8,12 @@ Se você roda o DeskcommCRM numa VPS, **leia a seção da versão para a qual es
 
 ## [Não lançado]
 
+## [1.104.0] — 2026-11-18
+
+### Novidades
+
+- **Item "Prontuário" no menu, em Atendimento.** Leva ao prontuário eletrônico, que tem o mesmo login. O endereço do prontuário fica em **Admin › Credenciais** ("Endereço do prontuário"); vazio, o item só avisa que o prontuário não está ligado. Quem vê paciente continua sendo decidido pelo próprio prontuário: só profissional cadastrado.
+
 ## [1.103.9] — 2026-11-16
 
 ### Segurança

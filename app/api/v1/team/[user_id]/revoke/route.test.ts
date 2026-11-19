@@ -272,7 +272,7 @@ describe("revogar membro", () => {
     expect(res.status).toBe(409);
     expect(updates).toHaveLength(2);
     expect(updates[0]).toHaveProperty("revoked_at");
-    expect(updates[0].revoked_at).not.toBeNull();
+    expect(updates[0]?.revoked_at).not.toBeNull();
     expect(updates[1]).toMatchObject({ revoked_at: null });
     expect(pushApagado).toBeNull();
     expect(audit).not.toHaveBeenCalledWith(

@@ -218,6 +218,18 @@ export const NAV_CATALOG = [
     group: "atendimento",
     sidebar: true,
   },
+  {
+    // Fluxo Care: a porta do prontuário, que é um app separado (mesmo login).
+    // A página só redireciona para o endereço de Admin › Credenciais
+    // (PRONTUARIO_URL). Sem `minRole`: quem decide quem vê paciente é o
+    // próprio prontuário (só profissional cadastrado), não este menu.
+    href: "/app/prontuario",
+    label: "Prontuário",
+    description: "O prontuário eletrônico: pacientes, atendimentos, receitas e teleconsultas.",
+    icon: "Stethoscope",
+    group: "atendimento",
+    sidebar: true,
+  },
 
   // ---- CRM — o funil ----
   {

@@ -497,6 +497,13 @@ const schema = z.object({
    */
   SUPPORT_EMAIL: z.string().optional().default(""),
 
+  /**
+   * Fluxo Care: endereço do prontuário (app separado). Lido por
+   * `valorDaInstalacao("PRONTUARIO_URL")` em `app/app/prontuario/page.tsx`;
+   * editável em Admin › Credenciais. Vazio = a porta avisa que não está ligado.
+   */
+  PRONTUARIO_URL: z.string().optional().default(""),
+
   // EPIC-11 Impersonate cookie HMAC secret. Optional at boot (route returns
   // 503 at runtime if missing/short); required in prod for the feature to
   // function. Min 32 chars when present is enforced at use site.

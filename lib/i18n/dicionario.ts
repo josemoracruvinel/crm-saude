@@ -2016,6 +2016,14 @@ export const DICIONARIO: Traducoes = {
   // produto; o label entra aqui para não degradar em silêncio no espanhol.
   "Seu tema na tela": { es: "Tu tema en pantalla" },
   "Respostas rápidas": { es: "Respuestas rápidas" },
+  // Fluxo Care: a porta do prontuário no menu (app/app/prontuario).
+  "Prontuário": { es: "Historia clínica" },
+  "O prontuário eletrônico: pacientes, atendimentos, receitas e teleconsultas.": {
+    es: "La historia clínica electrónica: pacientes, consultas, recetas y teleconsultas.",
+  },
+  "O prontuário ainda não está ligado nesta instalação. Quem administra a plataforma grava o endereço dele em Admin › Credenciais.": {
+    es: "La historia clínica aún no está conectada en esta instalación. Quien administra la plataforma guarda su dirección en Admin › Credenciales.",
+  },
   Contatos: { es: "Contactos" },
   // A CHAVE É O TEXTO PT-BR, então renomear um rótulo no registro de navegação
   // sem mexer aqui NÃO quebra teste nenhum — degrada em silêncio: `traduzir()`

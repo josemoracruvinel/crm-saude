@@ -162,6 +162,17 @@ export const CATALOGO_DA_INSTALACAO: readonly ChaveDaInstalacao[] = [
     controle: "edita",
   },
   {
+    // Fluxo Care: o prontuário é um app separado (repositório próprio). Quem lê
+    // é `app/app/prontuario/page.tsx`, a porta "Prontuário" do menu.
+    chave: "PRONTUARIO_URL",
+    rotulo: "Endereço do prontuário",
+    explicacao:
+      "O endereço do prontuário eletrônico (começa com https://). O item Prontuário do menu leva até ele. Vazio, o item avisa que o prontuário não está ligado.",
+    grupo: "integracao",
+    natureza: "texto",
+    controle: "edita",
+  },
+  {
     chave: "LGPD_DPO_EMAIL",
     rotulo: "E-mail do encarregado de dados (DPO)",
     explicacao:
