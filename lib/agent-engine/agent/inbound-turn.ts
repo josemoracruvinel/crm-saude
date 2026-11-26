@@ -12,6 +12,7 @@ import {
   type TurnPreview,
 } from './preview';
 import { etiquetarProdutoAposEnvio } from './etiqueta-apos-envio';
+import { criarFilaDeEnvio } from './fila-de-envio';
 import { claimOfJob } from '../queue/claim';
 import { currentExecutionBoundary, guardServiceEffect } from '@/lib/atendimento/fronteira-server';
 /**
@@ -3744,6 +3745,9 @@ async function executarTurnoDoAgente(
   // SDK as executa juntas) — sem a reserva, todas passariam pela checagem antes de
   // qualquer envio registrar (#2996, item 6).
   const dupTrava = criarTravaDeDuplicata();
+  // ORDEM DE SAÍDA: send_message/send_template de um mesmo passo correm em
+  // fila, na ordem em que o modelo os escreveu — ver `fila-de-envio.ts`.
+  const naOrdem = criarFilaDeEnvio();
   // #1943: o turno foi DESCARTADO como obsoleto (guard `resposta_obsoleta`, #1940)
   // ainda no run — o cliente escreveu de novo enquanto o modelo pensava. Quando
   // ligada, NADA mais sai dele, nem a pergunta pendente do roteiro (que segue
@@ -4228,7 +4232,7 @@ async function executarTurnoDoAgente(
     }),
     send_template: tool({
       ...AGENT_TOOL_DEFS.send_template,
-      execute: async ({ template_name, language, values }) => {
+      execute: ({ template_name, language, values }) => naOrdem(async () => {
         tentativasDeEnvio += 1;
         if (seq >= maxSendsPerTurn) {
           return {
@@ -4352,7 +4356,7 @@ async function executarTurnoDoAgente(
           };
         }
         return { ok: true, status: 'aceita_aguardando_canal' };
-      },
+      }),
     }),
     search_knowledge: tool({
       ...AGENT_TOOL_DEFS.search_knowledge,
@@ -4397,7 +4401,7 @@ async function executarTurnoDoAgente(
     }),
     send_message: tool({
       ...AGENT_TOOL_DEFS.send_message,
-      execute: async ({ body: corpoDoModelo, produto_codigo }) => {
+      execute: ({ body: corpoDoModelo, produto_codigo }) => naOrdem(async () => {
         tentativasDeEnvio += 1;
         // O texto sai no formato do WhatsApp — sem `\n` literal nem
         // `**negrito**` de Markdown na tela do cliente. Antes de qualquer gate,
@@ -5135,7 +5139,7 @@ async function executarTurnoDoAgente(
           // legítimas.
           dupTrava.liberar(body);
         }
-      },
+      }),
     }),
     update_lead_state: tool({
       ...AGENT_TOOL_DEFS.update_lead_state,
