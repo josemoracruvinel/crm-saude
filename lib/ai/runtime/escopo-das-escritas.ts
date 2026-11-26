@@ -57,6 +57,9 @@ export const ESCOPO_DAS_ESCRITAS: Readonly<Record<string, Readonly<Record<string
   crm_cancel_appointment: { appointment_id: "compromisso" },
   crm_confirm_appointment: { appointment_id: "compromisso" },
   crm_set_appointment_outcome: { appointment_id: "compromisso" },
+  // A cobrança é da consulta do contato DESTE turno: o paciente da conversa paga
+  // a própria consulta, nunca a de outra pessoa.
+  crm_charge_appointment: { appointment_id: "compromisso" },
 
   // ---- contato e conversa ----
   crm_propose_contact_field: { contact_id: "contato" },

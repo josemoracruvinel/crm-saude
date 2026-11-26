@@ -48,6 +48,8 @@ import { avisoDeEtapaHandler } from "@/lib/leads/aviso-de-etapa.handler";
 import { avisoAoDonoDaCarteira } from "@/lib/carteira/aviso-ao-dono";
 import { comandaDoGanhoHandler } from "@/lib/financeiro/comanda-do-ganho.handler";
 import { funilPeloAgendamentoHandler } from "@/lib/agenda/funil-pelo-agendamento.handler";
+import { sinalDePagamentoHandler } from "@/lib/pagamento-de-consulta/sinal.handler";
+import { cancelamentoDaCobrancaHandler } from "@/lib/pagamento-de-consulta/cancelamento.handler";
 import { webPushInboundHandler } from "@/lib/notifications/push.handler";
 import { avisoDePropostaNoWhatsAppHandler } from "@/lib/propostas/aviso-no-whatsapp.handler";
 import { aiHandoffFromSentimentHandler } from "@/workers/ai-handoff-from-sentiment.handler";
@@ -78,6 +80,12 @@ const RODA: EventHandler[] = [
   followupSaidaDaEtapaHandler,
   // Horário reservado/confirmado avança o funil: escrita interna, sem rede.
   funilPeloAgendamentoHandler,
+  // O pagamento da consulta já caiu na conta da clínica: registrar e confirmar
+  // roda com a organização parada, como a cobrança do revendedor. A mensagem ao
+  // paciente é recusada pelo `sendMessageHandler` da org parada.
+  sinalDePagamentoHandler,
+  // Consulta cancelada tira a cobrança pendente do ar: o lado seguro, mesmo parada.
+  cancelamentoDaCobrancaHandler,
 ];
 
 const PULA: EventHandler[] = [

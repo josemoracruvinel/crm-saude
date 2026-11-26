@@ -91,6 +91,10 @@ const TETO: Readonly<Record<string, { tokens: number; motivo: string }>> = {
   "crm_cancel_appointment": { tokens: 275, motivo: BASE },
   "crm_confirm_appointment": { tokens: 318, motivo: BASE },
   "crm_set_appointment_outcome": { tokens: 263, motivo: BASE },
+  "crm_charge_appointment": {
+    tokens: 335,
+    motivo: "ferramenta nova (cobrança da consulta pelo Asaas, 1.105.0): a descrição ensina a pedir o CPF só na primeira vez e a nunca afirmar consulta confirmada antes do pagamento",
+  },
   "crm_create_lead": { tokens: 933, motivo: BASE },
   "crm_update_lead": { tokens: 817, motivo: BASE },
   "crm_move_lead_stage": { tokens: 380, motivo: BASE },
@@ -133,7 +137,8 @@ const TETO: Readonly<Record<string, { tokens: number; motivo: string }>> = {
   "schedule_followup (com negócio)": { tokens: 314, motivo: BASE },
 };
 
-const TETO_TOTAL = 29952;
+// +335 da `crm_charge_appointment` (cobrança da consulta, 1.105.0).
+const TETO_TOTAL = 30287;
 
 const VARIANTE = "schedule_followup (com negócio)";
 

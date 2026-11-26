@@ -7,6 +7,7 @@ import { moduloLigado } from "@/lib/instalacao/modulos";
 import { createAdminClient } from "@/lib/supabase/admin";
 
 import { CatalogoFinanceiro } from "./_client";
+import { PagamentoDeConsultas } from "./_pagamento-de-consulta";
 
 export const dynamic = "force-dynamic";
 
@@ -44,6 +45,7 @@ export default async function Page() {
           {t("Onde o dinheiro fica, como o cliente paga e como cada lançamento é classificado.")}
         </p>
       </div>
+      <PagamentoDeConsultas podeEditar={ROLE_RANK[org.role] >= ROLE_RANK.admin} />
       <CatalogoFinanceiro
         podeEditar={podeEditar}
         comissaoDisponivel={await moduloLigado(createAdminClient(), "financeiro")}

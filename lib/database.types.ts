@@ -10575,6 +10575,174 @@ export type Database = {
           },
         ];
       };
+      consulta_pagamento_conexoes: {
+        Row: {
+          api_key_encrypted: string;
+          api_key_last4: string;
+          created_at: string;
+          id: string;
+          modo: string;
+          organization_id: string;
+          provider: string;
+          updated_at: string;
+          updated_by: string | null;
+          webhook_id: string | null;
+          webhook_token_hash: string | null;
+        };
+        ComputedFields: never;
+        Insert: {
+          api_key_encrypted: string;
+          api_key_last4: string;
+          created_at?: string;
+          id?: string;
+          modo: string;
+          organization_id: string;
+          provider?: string;
+          updated_at?: string;
+          updated_by?: string | null;
+          webhook_id?: string | null;
+          webhook_token_hash?: string | null;
+        };
+        Update: {
+          api_key_encrypted?: string;
+          api_key_last4?: string;
+          created_at?: string;
+          id?: string;
+          modo?: string;
+          organization_id?: string;
+          provider?: string;
+          updated_at?: string;
+          updated_by?: string | null;
+          webhook_id?: string | null;
+          webhook_token_hash?: string | null;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "consulta_pagamento_conexoes_organization_id_fkey";
+            columns: ["organization_id"];
+            isOneToOne: false;
+            referencedRelation: "organizations";
+            referencedColumns: ["id"];
+          },
+        ];
+      };
+      consulta_pagamento_clientes: {
+        Row: {
+          contact_id: string;
+          created_at: string;
+          id: string;
+          modo: string;
+          organization_id: string;
+          provider_customer_id: string;
+        };
+        ComputedFields: never;
+        Insert: {
+          contact_id: string;
+          created_at?: string;
+          id?: string;
+          modo: string;
+          organization_id: string;
+          provider_customer_id: string;
+        };
+        Update: {
+          contact_id?: string;
+          created_at?: string;
+          id?: string;
+          modo?: string;
+          organization_id?: string;
+          provider_customer_id?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "consulta_pagamento_clientes_contact_id_fkey";
+            columns: ["contact_id"];
+            isOneToOne: false;
+            referencedRelation: "contacts";
+            referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "consulta_pagamento_clientes_organization_id_fkey";
+            columns: ["organization_id"];
+            isOneToOne: false;
+            referencedRelation: "organizations";
+            referencedColumns: ["id"];
+          },
+        ];
+      };
+      consulta_pagamentos: {
+        Row: {
+          appointment_id: string | null;
+          confirmou_consulta: boolean;
+          contact_id: string | null;
+          created_at: string;
+          id: string;
+          link: string | null;
+          modo: string;
+          organization_id: string;
+          pago_em: string | null;
+          provider_payment_id: string;
+          situacao: string;
+          updated_at: string;
+          valor_cents: number;
+          vencimento: string | null;
+        };
+        ComputedFields: never;
+        Insert: {
+          appointment_id?: string | null;
+          confirmou_consulta?: boolean;
+          contact_id?: string | null;
+          created_at?: string;
+          id?: string;
+          link?: string | null;
+          modo: string;
+          organization_id: string;
+          pago_em?: string | null;
+          provider_payment_id: string;
+          situacao?: string;
+          updated_at?: string;
+          valor_cents: number;
+          vencimento?: string | null;
+        };
+        Update: {
+          appointment_id?: string | null;
+          confirmou_consulta?: boolean;
+          contact_id?: string | null;
+          created_at?: string;
+          id?: string;
+          link?: string | null;
+          modo?: string;
+          organization_id?: string;
+          pago_em?: string | null;
+          provider_payment_id?: string;
+          situacao?: string;
+          updated_at?: string;
+          valor_cents?: number;
+          vencimento?: string | null;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "consulta_pagamentos_appointment_id_fkey";
+            columns: ["appointment_id"];
+            isOneToOne: false;
+            referencedRelation: "calendar_appointments";
+            referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "consulta_pagamentos_contact_id_fkey";
+            columns: ["contact_id"];
+            isOneToOne: false;
+            referencedRelation: "contacts";
+            referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "consulta_pagamentos_organization_id_fkey";
+            columns: ["organization_id"];
+            isOneToOne: false;
+            referencedRelation: "organizations";
+            referencedColumns: ["id"];
+          },
+        ];
+      };
       map_provider_credentials: {
         Row: {
           api_key_encrypted: string;

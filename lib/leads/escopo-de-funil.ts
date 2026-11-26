@@ -130,6 +130,9 @@ export const ALVO_DE_FUNIL: Record<string, AlvoDeFunil> = {
   // vem e liberaria 100% das vezes, com aparência de escopado.
   crm_confirm_appointment: "sem_funil",
   crm_set_appointment_outcome: "sem_funil",
+  // A cobrança mexe na consulta e no Asaas, não no negócio: o cartão anda pela
+  // confirmação da consulta (1.104.3), que tem a régua própria.
+  crm_charge_appointment: "sem_funil",
 
   // ---- não têm funil, e isso é declarado ----
   crm_send_whatsapp_message: "sem_funil",

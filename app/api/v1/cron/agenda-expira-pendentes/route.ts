@@ -50,6 +50,7 @@ import type { NextRequest } from "next/server";
 import { ok, fail } from "@/lib/api/wrappers";
 import { audit } from "@/lib/audit";
 import { logger } from "@/lib/logger";
+import { cancelarCobrancasDasConsultas } from "@/lib/pagamento-de-consulta/producao";
 import { agendaSettingsSchema } from "@/lib/schemas/settings";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { autorizaCron } from "@/lib/auth/cron-auth";
@@ -148,6 +149,15 @@ async function handle(req: NextRequest): Promise<Response> {
 
   const quantos = efetivados?.length ?? 0;
 
+  // A cobrança da consulta (Asaas da clínica) da reserva que venceu sai do ar:
+  // o paciente não pode pagar por um horário que voltou para a agenda. Melhor
+  // esforço — `cancelarCobrancasDasConsultas` nunca lança, e o que escapar o
+  // aviso de pagamento tardio cobre.
+  const cobrancasCanceladas = await cancelarCobrancasDasConsultas(
+    admin,
+    (efetivados ?? []).map((e) => e.id as string),
+  );
+
   // Rodada que não expirou nada NÃO é mutação e não audita — a lei está no
   // CLAUDE.md §Audit log, e `cron-audita-so-quando-ha-efeito.test.ts` varre o
   // AST desta pasta atrás de `audit` incondicional.
@@ -156,12 +166,12 @@ async function handle(req: NextRequest): Promise<Response> {
       action: "agenda.pendente_expirado",
       resourceType: "calendar_appointment",
       requestId,
-      metadata: { expirados: quantos, examinados: linhas.length },
+      metadata: { expirados: quantos, examinados: linhas.length, cobrancas_canceladas: cobrancasCanceladas },
     });
   }
 
   return ok(
-    { examinados: linhas.length, expirados: quantos, mantidos },
+    { examinados: linhas.length, expirados: quantos, mantidos, cobrancas_canceladas: cobrancasCanceladas },
     { requestId },
   );
 }

@@ -39,6 +39,8 @@ import { avisoDePropostaNoWhatsAppHandler } from "@/lib/propostas/aviso-no-whats
 import { avisoDeAgendamentoNoWhatsAppHandler } from "@/lib/agenda/aviso-de-agendamento.handler";
 import { funilPeloAgendamentoHandler } from "@/lib/agenda/funil-pelo-agendamento.handler";
 import { cobrancaSinalHandler } from "@/lib/cobranca/sinal.handler";
+import { sinalDePagamentoHandler } from "@/lib/pagamento-de-consulta/sinal.handler";
+import { cancelamentoDaCobrancaHandler } from "@/lib/pagamento-de-consulta/cancelamento.handler";
 import { registerHandler } from "@/lib/event-log/dispatcher";
 
 let _registered = false;
@@ -102,6 +104,12 @@ export function ensureHandlersRegistered(): void {
   // A cobrança do revendedor: relê o provedor (rede de terceiro) e só então
   // escreve. Consome um evento só dela, então a posição não atrasa ninguém.
   registerHandler(cobrancaSinalHandler);
+  // O pagamento da consulta no Asaas da clínica: mesmo critério do de cima —
+  // relê o provedor (rede de terceiro) e só então confirma a consulta. Consome
+  // um evento só dele.
+  registerHandler(sinalDePagamentoHandler);
+  // Consulta cancelada tira do ar a cobrança pendente dela (rede de terceiro).
+  registerHandler(cancelamentoDaCobrancaHandler);
   // Penúltimo, pelo MESMO critério do último: o aviso ao suporte sai por rede de
   // terceiro (o transporte de WhatsApp) e nunca pode atrasar quem escreve no
   // banco — inclusive o `followupGatilhoCasoHandler`, que consome o MESMO evento

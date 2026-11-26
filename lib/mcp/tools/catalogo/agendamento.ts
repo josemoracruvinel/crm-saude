@@ -252,6 +252,21 @@ export const TOOLS_AGENDAMENTO = declararTools([
     pacotes: ["vender"],
   },
   {
+    name: "crm_charge_appointment",
+    category: "write",
+    rotulo: "Cobrar a consulta",
+    explicacao:
+      "Gera o link de pagamento da consulta na conta Asaas da clínica e manda para o paciente. Quando o pagamento cai, a consulta se confirma sozinha. Só funciona com a conta Asaas conectada em Configurações › Financeiro.",
+    oQueToca: "Agenda da equipe",
+    // `critico`: o link de cobrança chega ao paciente e não se desmanda. E é a
+    // régua que mantém a capacidade FORA do agente que nasce com o pacote: só
+    // liga quem conectou a conta Asaas e marcou à mão (medido: no pacote como
+    // `atencao`, o agente novo lotava e nenhuma jornada nova cabia —
+    // `pacote-reserva-vaga-da-critica.test.ts`).
+    risco: "critico",
+    pacotes: ["vender"],
+  },
+  {
     name: "crm_cancel_appointment",
     category: "write",
     rotulo: "Desmarcar um compromisso",

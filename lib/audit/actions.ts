@@ -1460,6 +1460,11 @@ export const AUDIT_ACTIONS = [
   // 9096), na organização NOVA, com o id do molde e as contagens no metadata;
   // quem lê é Painel › Empresas › [empresa] ("IA copiada do molde").
   "ai.molde_de_ia_aplicado",
+  // A conta Asaas da clínica para cobrar consultas (migration 9222, Configurações
+  // › Financeiro): conectada ou trocada, e desconectada. O metadata diz O QUE
+  // mudou (4 últimos caracteres, teste ou produção) — nunca a chave.
+  "consulta_pagamento.conectado",
+  "consulta_pagamento.desconectado",
 ] as const;
 
 /** Um código de auditoria. Derivado de `AUDIT_ACTIONS` — não redigite a lista. */

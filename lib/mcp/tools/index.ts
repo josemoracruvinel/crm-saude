@@ -96,6 +96,7 @@ import {
   crmProposeReactivation,
 } from "./retencao";
 import { crmDraftProposal, crmPrepararProposta } from "./propostas";
+import { crmChargeAppointment } from "./pagamento-de-consulta";
 
 // Cast via `unknown` porque McpToolDefinition<TInput> nao e covariante
 // em TInput (handler usa TInput em posicao contravariante). Coletar
@@ -157,6 +158,7 @@ export const allTools: ReadonlyArray<McpToolDefinition> = [
   crmCancelAppointment,
   crmConfirmAppointment,
   crmSetAppointmentOutcome,
+  crmChargeAppointment,
   crmCreateLead,
   crmUpdateLead,
   crmMoveLeadStage,

@@ -8,6 +8,16 @@ Se você roda o DeskcommCRM numa VPS, **leia a seção da versão para a qual es
 
 ## [Não lançado]
 
+## [1.105.0] — 2026-11-26
+### Novidades
+- **O atendente de IA cobra a consulta pelo Asaas da clínica.** Com a conta Asaas conectada, o atendente marca o horário, gera o link de pagamento (Pix ou cartão, o paciente escolhe) e manda ao paciente. Quando o pagamento cai, a consulta se confirma sozinha, o paciente recebe "Pagamento recebido! Sua consulta está confirmada" pelo WhatsApp, e o cartão do funil vai para a etapa de consulta agendada. O dinheiro vai direto para a conta Asaas da clínica.
+  - Para ligar: em **Configurações › Financeiro**, cartão "Pagamento de consultas (Asaas)", cole a chave de API do Asaas e clique em Conectar (o sistema testa a chave e cadastra sozinho o aviso de pagamento no Asaas). Depois preencha o **preço** do tipo de consulta, ligue "Exigir confirmação humana" nele e marque a capacidade **Cobrar a consulta** no agente.
+  - Na primeira cobrança de cada paciente o atendente pede o CPF, que o Asaas exige. Ele fica guardado cifrado na ficha e não é pedido de novo.
+  - A mesma consulta nunca é cobrada duas vezes. Se a reserva expirar ou a consulta for cancelada, a cobrança pendente sai do Asaas. Se o paciente pagar depois disso, nada é confirmado sozinho e a equipe recebe um aviso na Central para remarcar ou estornar.
+  - Sem conta conectada, nada muda.
+### ⚠️ Requer atenção
+- O aviso de pagamento do Asaas só chega a instalações com endereço **https público**. A atualização cria três tabelas novas no banco; o `update.sh` aplica sozinho.
+
 ## [1.104.3] — 2026-11-26
 ### Novidades
 - **O cartão do funil anda sozinho quando uma consulta é marcada.** Antes, a IA marcava o horário e o cartão continuava parado na etapa de triagem. Agora:
