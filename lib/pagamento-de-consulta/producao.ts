@@ -45,6 +45,30 @@ async function cobrancaViva(admin: SupabaseClient, orgId: string, appointmentId:
   return (data as CobrancaGuardada | null) ?? null;
 }
 
+/**
+ * A conversa onde o aviso de pagamento chega ao paciente.
+ *
+ * Medido no teste de 26/11/2026: a consulta que o atendente de IA marca nasce
+ * SEM `conversation_id`, e o aviso saía só quando ela existia — o pagamento
+ * confirmou a consulta e moveu o cartão, mas o paciente não recebeu nada. Sem o
+ * vínculo, vale a conversa individual mais recente do contato que ainda está
+ * aberta: é onde ele combinou a consulta. Grupo nunca recebe.
+ */
+async function conversaDoContato(admin: SupabaseClient, orgId: string, contactId: string): Promise<string | null> {
+  const { data, error } = await admin
+    .from("conversations")
+    .select("id")
+    .eq("organization_id", orgId)
+    .eq("contact_id", contactId)
+    .eq("is_group", false)
+    .not("status", "in", "(closed,resolved,archived)")
+    .order("last_message_at", { ascending: false, nullsFirst: false })
+    .limit(1)
+    .maybeSingle();
+  if (error) throw new Error(`conversations: ${error.message}`);
+  return (data as { id: string } | null)?.id ?? null;
+}
+
 async function idiomaDaOrg(admin: SupabaseClient, orgId: string) {
   const { data } = await admin.from("organizations").select("locale").eq("id", orgId).maybeSingle();
   return normalizarIdioma((data as { locale?: string | null } | null)?.locale);
@@ -201,8 +225,12 @@ export function criarDepsDeProcessar(admin: SupabaseClient): ProcessarDeps {
     },
 
     async avisaPaciente(orgId, c) {
-      if (!c.conversation_id) return;
       try {
+        const conversaId = c.conversation_id ?? (c.contact_id ? await conversaDoContato(admin, orgId, c.contact_id) : null);
+        if (!conversaId) {
+          logger.warn("[pagamento-de-consulta] paciente sem conversa para o aviso", { organization_id: orgId });
+          return;
+        }
         const idioma = await idiomaDaOrg(admin, orgId);
         const inicio = new Date(c.starts_at);
         const fuso = c.time_zone || "America/Sao_Paulo";
@@ -213,8 +241,8 @@ export function criarDepsDeProcessar(admin: SupabaseClient): ProcessarDeps {
           .replace("{hora}", hora);
         await sendMessageHandler(
           admin,
-          { organization_id: orgId, actor: { type: "webhook_source", id: c.conversation_id }, requestId: `pagamento-de-consulta:aviso:${c.conversation_id}` },
-          { conversation_id: c.conversation_id, type: "text", body: corpo } as Parameters<typeof sendMessageHandler>[2],
+          { organization_id: orgId, actor: { type: "webhook_source", id: conversaId }, requestId: `pagamento-de-consulta:aviso:${conversaId}` },
+          { conversation_id: conversaId, type: "text", body: corpo } as Parameters<typeof sendMessageHandler>[2],
         );
       } catch (err) {
         // A consulta já está confirmada; perder a mensagem é aceitável, repetir não.

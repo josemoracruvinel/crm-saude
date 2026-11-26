@@ -8,6 +8,10 @@ Se você roda o DeskcommCRM numa VPS, **leia a seção da versão para a qual es
 
 ## [Não lançado]
 
+## [1.105.3] — 2026-11-26
+### Correções
+- **A mensagem "Pagamento recebido" chega ao paciente quando a consulta foi marcada pelo atendente de IA.** O pagamento já confirmava a consulta e levava o cartão para a etapa de consulta agendada, mas a mensagem ao paciente não saía: a consulta marcada pela IA não fica ligada à conversa, e o aviso só era enviado quando essa ligação existia. Agora, sem a ligação, o aviso vai para a conversa individual mais recente do paciente que ainda está aberta. Nada a fazer na instalação.
+
 ## [1.105.2] — 2026-11-26
 ### Correções
 - **O paciente recebe "Pagamento recebido" também quando a consulta já estava confirmada.** Se o atendente de IA cobrava uma consulta que a equipe já tinha confirmado, o pagamento era registrado, mas a mensagem ao paciente não saía, e ele ficava esperando o aviso prometido. Agora a mensagem sai uma vez só, e a consulta continua como estava. Nada a fazer na instalação.
