@@ -37,6 +37,7 @@ import { avisoDeCasoAoSuporteHandler } from "@/lib/escalacao/aviso-ao-suporte.ha
 import { avisoDeHandoffHandler } from "@/lib/escalacao/aviso-de-handoff.handler";
 import { avisoDePropostaNoWhatsAppHandler } from "@/lib/propostas/aviso-no-whatsapp.handler";
 import { avisoDeAgendamentoNoWhatsAppHandler } from "@/lib/agenda/aviso-de-agendamento.handler";
+import { funilPeloAgendamentoHandler } from "@/lib/agenda/funil-pelo-agendamento.handler";
 import { cobrancaSinalHandler } from "@/lib/cobranca/sinal.handler";
 import { registerHandler } from "@/lib/event-log/dispatcher";
 
@@ -88,6 +89,10 @@ export function ensureHandlersRegistered(): void {
   // do negócio ganho (#1477). Antes de todo consumidor que sai por rede de
   // terceiro, pelo mesmo critério dos vizinhos de cima.
   registerHandler(comandaDoGanhoHandler);
+  // Horário reservado/confirmado avança o atendimento e move o card. Escrita
+  // curta no banco, ao lado das outras que só escrevem; o `lead.stage_changed`
+  // que ela emite é drenado depois, pelos consumidores de etapa.
+  registerHandler(funilPeloAgendamentoHandler);
   registerHandler(followupGatilhoPresencaHandler);
   registerHandler(mediaPersistHandler);
   registerHandler(mediaDeriveHandler);

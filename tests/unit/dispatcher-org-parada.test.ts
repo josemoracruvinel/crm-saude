@@ -47,6 +47,7 @@ import { followupSaidaDaEtapaHandler } from "@/lib/followup/saida-da-etapa.handl
 import { avisoDeEtapaHandler } from "@/lib/leads/aviso-de-etapa.handler";
 import { avisoAoDonoDaCarteira } from "@/lib/carteira/aviso-ao-dono";
 import { comandaDoGanhoHandler } from "@/lib/financeiro/comanda-do-ganho.handler";
+import { funilPeloAgendamentoHandler } from "@/lib/agenda/funil-pelo-agendamento.handler";
 import { webPushInboundHandler } from "@/lib/notifications/push.handler";
 import { avisoDePropostaNoWhatsAppHandler } from "@/lib/propostas/aviso-no-whatsapp.handler";
 import { aiHandoffFromSentimentHandler } from "@/workers/ai-handoff-from-sentiment.handler";
@@ -75,6 +76,8 @@ const RODA: EventHandler[] = [
   // e o lado SEGURO de uma organização parada (toque armado voltaria em rajada
   // na reativação, fora de contexto).
   followupSaidaDaEtapaHandler,
+  // Horário reservado/confirmado avança o funil: escrita interna, sem rede.
+  funilPeloAgendamentoHandler,
 ];
 
 const PULA: EventHandler[] = [

@@ -8,6 +8,14 @@ Se você roda o DeskcommCRM numa VPS, **leia a seção da versão para a qual es
 
 ## [Não lançado]
 
+## [1.104.3] — 2026-11-26
+### Novidades
+- **O cartão do funil anda sozinho quando uma consulta é marcada.** Antes, a IA marcava o horário e o cartão continuava parado na etapa de triagem. Agora:
+  - horário **reservado** (o tipo de consulta exige confirmação da equipe) leva o cartão para a etapa ligada a "Negociação" (no funil de clínica, "Escolhendo horário");
+  - horário **confirmado** (já nasce confirmado, ou a equipe clica em Confirmar na Agenda) leva o cartão para a etapa ligada a "Ganho" (no funil de clínica, "Consulta agendada").
+
+  Assim, quem confirma a consulta só depois do pagamento liga "exige confirmação da equipe" no tipo de consulta e confirma na Agenda quando o pagamento chegar. O cartão só anda para a frente: um cancelamento não faz ele voltar, e um cartão que já passou dessas etapas fica onde está. Vale para consultas marcadas depois da atualização. Nada a fazer na instalação.
+
 ## [1.104.2] — 2026-11-26
 ### Correções
 - **As mensagens do atendente de IA chegam ao cliente na ordem em que ele escreveu.** Quando o atendente respondia com várias mensagens de uma vez, elas podiam chegar fora de ordem: num agendamento, a abertura ("Boa notícia, consegui ver a agenda") chegou depois dos horários e do pedido de nome. Agora as mensagens de uma mesma resposta saem em fila. Nada a fazer na instalação.
