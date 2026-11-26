@@ -8,6 +8,10 @@ Se você roda o DeskcommCRM numa VPS, **leia a seção da versão para a qual es
 
 ## [Não lançado]
 
+## [1.104.2] — 2026-11-26
+### Correções
+- **As mensagens do atendente de IA chegam ao cliente na ordem em que ele escreveu.** Quando o atendente respondia com várias mensagens de uma vez, elas podiam chegar fora de ordem: num agendamento, a abertura ("Boa notícia, consegui ver a agenda") chegou depois dos horários e do pedido de nome. Agora as mensagens de uma mesma resposta saem em fila. Nada a fazer na instalação.
+
 ## [1.104.1] — 2026-11-19
 ### Correções
 - **"Endereço do prontuário" aparece em Admin › Credenciais**, num grupo próprio chamado "Prontuário". Na 1.104.0 o campo existia, mas a tela não o mostrava.
