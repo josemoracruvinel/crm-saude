@@ -8,6 +8,10 @@ Se você roda o DeskcommCRM numa VPS, **leia a seção da versão para a qual es
 
 ## [Não lançado]
 
+## [1.105.1] — 2026-11-26
+### Correções
+- **A atualização para a 1.105.0 parava no banco com `column e.ie does not exist`.** Uma letra trocada num bloco antigo do banco (sem relação com a cobrança de consultas) fazia a atualização parar com segurança, sem trocar a versão. Corrigido: a 1.105.1 traz tudo o que a 1.105.0 anunciou. Quem ficou na 1.104.3 atualiza direto para a 1.105.1; nada a fazer à mão.
+
 ## [1.105.0] — 2026-11-26
 ### Novidades
 - **O atendente de IA cobra a consulta pelo Asaas da clínica.** Com a conta Asaas conectada, o atendente marca o horário, gera o link de pagamento (Pix ou cartão, o paciente escolhe) e manda ao paciente. Quando o pagamento cai, a consulta se confirma sozinha, o paciente recebe "Pagamento recebido! Sua consulta está confirmada" pelo WhatsApp, e o cartão do funil vai para a etapa de consulta agendada. O dinheiro vai direto para a conta Asaas da clínica.

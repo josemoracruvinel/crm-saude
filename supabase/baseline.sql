@@ -20408,7 +20408,7 @@ do $$
 declare r record;
 begin
   for r in
-    select e.ie,
+    select e.id,
            e.organization_id,
            c.id as conversation_id,
            jsonb_build_object(
