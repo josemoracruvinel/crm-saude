@@ -245,10 +245,27 @@ describe("processarPagamento", () => {
     expect(deps.avisaEquipe).toHaveBeenCalledWith("org-1", "ap-1", "pago_sem_reserva");
   });
 
-  it("a equipe já tinha confirmado à mão: vale a decisão dela, só registra", async () => {
+  it("consulta que já estava confirmada: não mexe nela, mas avisa o paciente que o pagamento caiu", async () => {
+    // Medido em 26/11/2026: a IA cobrou uma consulta já confirmada e prometeu
+    // "eu te aviso por aqui" — sem o aviso, a promessa ficava sem cumprir.
     const { deps } = depsDeProcessar({ consulta: consulta({ status: "confirmed" }) });
     expect(await processarPagamento(deps, AVISO)).toBe("ja_confirmada");
     expect(deps.confirmaConsulta).not.toHaveBeenCalled();
+    expect(deps.marcaQueConfirmou).toHaveBeenCalledWith("org-1", "cp-1");
+    expect(deps.avisaPaciente).toHaveBeenCalledTimes(1);
+  });
+
+  it("consulta já confirmada e aviso repetido do Asaas: o paciente não recebe duas vezes", async () => {
+    const { deps } = depsDeProcessar({ consulta: consulta({ status: "confirmed" }), marca: false });
+    expect(await processarPagamento(deps, AVISO)).toBe("ja_confirmada");
+    expect(deps.avisaPaciente).not.toHaveBeenCalled();
+  });
+
+  it("consulta que já aconteceu (ou faltou): só registra o pagamento", async () => {
+    const { deps } = depsDeProcessar({ consulta: consulta({ status: "completed" }) });
+    expect(await processarPagamento(deps, AVISO)).toBe("registrado");
+    expect(deps.confirmaConsulta).not.toHaveBeenCalled();
+    expect(deps.avisaPaciente).not.toHaveBeenCalled();
   });
 
   it("cobrança feita à mão no painel do Asaas, ou clínica sem conexão: não é nossa", async () => {

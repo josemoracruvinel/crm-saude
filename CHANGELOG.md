@@ -8,6 +8,10 @@ Se você roda o DeskcommCRM numa VPS, **leia a seção da versão para a qual es
 
 ## [Não lançado]
 
+## [1.105.2] — 2026-11-26
+### Correções
+- **O paciente recebe "Pagamento recebido" também quando a consulta já estava confirmada.** Se o atendente de IA cobrava uma consulta que a equipe já tinha confirmado, o pagamento era registrado, mas a mensagem ao paciente não saía, e ele ficava esperando o aviso prometido. Agora a mensagem sai uma vez só, e a consulta continua como estava. Nada a fazer na instalação.
+
 ## [1.105.1] — 2026-11-26
 ### Correções
 - **A atualização para a 1.105.0 parava no banco com `column e.ie does not exist`.** Uma letra trocada num bloco antigo do banco (sem relação com a cobrança de consultas) fazia a atualização parar com segurança, sem trocar a versão. Corrigido: a 1.105.1 traz tudo o que a 1.105.0 anunciou. Quem ficou na 1.104.3 atualiza direto para a 1.105.1; nada a fazer à mão.

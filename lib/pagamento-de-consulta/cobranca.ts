@@ -237,8 +237,17 @@ export async function processarPagamento(
     await deps.avisaEquipe(org, guardada.appointment_id, "pago_sem_reserva");
     return "pago_sem_reserva";
   }
-  // A equipe confirmou antes do pagamento: vale a decisão dela; só registra.
-  if (consulta.status !== "pending") return "ja_confirmada";
+  // Medido no teste de 26/11/2026: a consulta já estava CONFIRMADA (a equipe, ou
+  // um tipo sem confirmação, confirmou antes) e a IA cobrou mesmo assim, dizendo
+  // ao paciente "eu te aviso por aqui quando o pagamento cair". Só registrar
+  // deixava essa promessa sem cumprir. Agora o paciente recebe o MESMO aviso;
+  // a consulta não é mexida (já estava confirmada) e o cartão não anda de novo.
+  if (consulta.status === "confirmed") {
+    if (await deps.marcaQueConfirmou(org, guardada.id)) await deps.avisaPaciente(org, consulta);
+    return "ja_confirmada";
+  }
+  // Situação que não é reserva nem confirmação (atendida, faltou): só registra.
+  if (consulta.status !== "pending") return "registrado";
 
   const confirmou = await deps.confirmaConsulta(org, guardada.appointment_id);
   if (!confirmou) return "ja_confirmada";
