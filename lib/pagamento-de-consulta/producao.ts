@@ -11,7 +11,10 @@ import type { SupabaseClient } from "@supabase/supabase-js";
 import { alterarAgendamentoHandler } from "@/app/api/v1/agenda/agendamentos/_handler";
 import { sendMessageHandler } from "@/app/api/v1/messages/_handler";
 import { ApiError } from "@/lib/api/types";
+import { moedaDaOrganizacao } from "@/lib/catalogo/moeda-da-org";
 import { camposCpfParaGravar } from "@/lib/contacts/cpf";
+import { percentualDoItem } from "@/lib/financeiro/comissao-do-item";
+import { moduloLigado } from "@/lib/instalacao/modulos";
 import { traduzir } from "@/lib/i18n/dicionario";
 import { normalizarIdioma } from "@/lib/i18n/idiomas";
 import { logger } from "@/lib/logger";
@@ -25,7 +28,7 @@ const COLUNAS_DA_COBRANCA = "id, provider_payment_id, appointment_id, situacao, 
 async function consulta(admin: SupabaseClient, orgId: string, appointmentId: string): Promise<ConsultaDaCobranca | null> {
   const { data, error } = await admin
     .from("calendar_appointments")
-    .select("status, contact_id, conversation_id, event_type_id, starts_at, time_zone, title")
+    .select("status, contact_id, conversation_id, event_type_id, starts_at, time_zone, title, owner_user_id")
     .eq("organization_id", orgId)
     .eq("id", appointmentId)
     .maybeSingle();
@@ -291,8 +294,111 @@ export function criarDepsDeProcessar(admin: SupabaseClient): ProcessarDeps {
       }
     },
 
+    abreComanda: (orgId, appointmentId, consulta, cobranca) => abrirComandaDaConsulta(admin, orgId, appointmentId, consulta, cobranca),
+
     clock: () => new Date(),
   };
+}
+
+/**
+ * A COMANDA DA CONSULTA PAGA — o elo entre o Asaas e o repasse semanal.
+ *
+ * Abre (aberta, não finalizada) a comanda da consulta com UM item: o serviço, o
+ * valor pago, o PROFISSIONAL que atende (`owner_user_id` da consulta) e o
+ * percentual da regra de comissão congelado agora (`percentualDoItem`, a mesma
+ * porta de toda gravação de `sale_items`). Quem FECHA é a equipe, em Comandas,
+ * depois da consulta: `fn_finalizar_comanda` conclui o atendimento, e o banco só
+ * aceita isso de uma pessoa e com o horário já passado — é o "atendido" que faz
+ * a comissão entrar na "Comissão por pessoa" do Faturamento. Falta ou reembolso:
+ * a comanda não é fechada e não há repasse.
+ *
+ * Só com o módulo Comandas instalado. Idempotente pelo índice
+ * `sales_agendamento_unico_idx` (uma comanda viva por consulta): a que já existe,
+ * aberta à mão ou por um aviso anterior, vale. Nunca lança — o pagamento já foi
+ * registrado e a consulta confirmada; a comanda é a parte acessória.
+ *
+ * Descrição do item = nome do TIPO de consulta, nunca o título do compromisso
+ * (que costuma levar o nome do paciente e ficaria fora da cascata de redact da
+ * LGPD, como explica `comanda-do-ganho.ts`).
+ */
+async function abrirComandaDaConsulta(
+  admin: SupabaseClient,
+  orgId: string,
+  appointmentId: string,
+  consulta: ConsultaDaCobranca,
+  cobranca: CobrancaGuardada,
+): Promise<void> {
+  try {
+    if (!(await moduloLigado(admin, "financeiro"))) return;
+
+    const { data: existente } = await admin
+      .from("sales")
+      .select("id")
+      .eq("organization_id", orgId)
+      .eq("appointment_id", appointmentId)
+      .neq("status", "cancelled")
+      .limit(1)
+      .maybeSingle();
+    if (existente) return;
+
+    const { data: numero, error: erroNumero } = await admin.rpc("fn_proximo_numero_de_comanda", { p_org: orgId });
+    if (erroNumero || numero === null || numero === undefined) throw new Error(`numeração: ${erroNumero?.message ?? "sem número"}`);
+
+    const idioma = await idiomaDaOrg(admin, orgId);
+    const profissional = consulta.owner_user_id ?? null;
+    const { data: comanda, error: erroComanda } = await admin
+      .from("sales")
+      .insert({
+        organization_id: orgId,
+        number: Number(numero),
+        contact_id: consulta.contact_id,
+        appointment_id: appointmentId,
+        attendant_user_id: profissional,
+        created_by_user_id: null,
+        currency: await moedaDaOrganizacao(admin, orgId),
+        notes: traduzir("Pago antecipadamente pelo Asaas. Feche esta comanda depois da consulta, com a forma de pagamento do Asaas.", idioma),
+      })
+      .select("id")
+      .single();
+    if (erroComanda) {
+      // 23505: outra comanda viva para a mesma consulta nasceu no meio — ela vale.
+      if (erroComanda.code === "23505") return;
+      throw new Error(`comanda: ${erroComanda.message}`);
+    }
+
+    let servico = traduzir("Consulta", idioma);
+    if (consulta.event_type_id) {
+      const { data: tipo } = await admin
+        .from("calendar_event_types")
+        .select("name")
+        .eq("organization_id", orgId)
+        .eq("id", consulta.event_type_id)
+        .maybeSingle();
+      const nome = (tipo as { name?: string | null } | null)?.name?.trim();
+      if (nome) servico = nome.slice(0, 200);
+    }
+
+    const { error: erroItem } = await admin.from("sale_items").insert({
+      organization_id: orgId,
+      sale_id: (comanda as { id: string }).id,
+      event_type_id: consulta.event_type_id,
+      description: servico,
+      quantity: 1,
+      unit_price_cents: cobranca.valor_cents,
+      total_cents: cobranca.valor_cents,
+      attendant_user_id: profissional,
+      commission_percent: await percentualDoItem(admin, orgId, {
+        attendantUserId: profissional,
+        eventTypeId: consulta.event_type_id,
+      }),
+    });
+    if (erroItem) throw new Error(`item: ${erroItem.message}`);
+  } catch (err) {
+    logger.warn("[pagamento-de-consulta] comanda da consulta paga não aberta", {
+      organization_id: orgId,
+      error: err instanceof Error ? err.message.slice(0, 200) : "erro",
+    });
+  }
 }
 
 /**

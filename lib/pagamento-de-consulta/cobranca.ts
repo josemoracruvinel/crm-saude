@@ -24,6 +24,8 @@ import type { ModoDaConexao } from "./conexao";
 export interface ConsultaDaCobranca {
   status: string;
   contact_id: string | null;
+  /** Quem atende: vira o profissional da comanda e decide a comissão. */
+  owner_user_id?: string | null;
   conversation_id: string | null;
   event_type_id: string | null;
   starts_at: string;
@@ -204,6 +206,12 @@ export interface ProcessarDeps {
   marcaQueConfirmou(orgId: string, id: string): Promise<boolean>;
   avisaPaciente(orgId: string, consulta: ConsultaDaCobranca): Promise<void>;
   avisaEquipe(orgId: string, appointmentId: string | null, motivo: "pago_sem_reserva"): Promise<void>;
+  /**
+   * Abre a comanda da consulta paga, no nome do profissional que atende (o
+   * repasse semanal sai da "Comissão por pessoa" do Faturamento). Idempotente
+   * pela comanda única por consulta; melhor esforço, nunca lança.
+   */
+  abreComanda(orgId: string, appointmentId: string, consulta: ConsultaDaCobranca, cobranca: CobrancaGuardada): Promise<void>;
   clock(): Date;
 }
 
@@ -244,6 +252,7 @@ export async function processarPagamento(
   // a consulta não é mexida (já estava confirmada) e o cartão não anda de novo.
   if (consulta.status === "confirmed") {
     if (await deps.marcaQueConfirmou(org, guardada.id)) await deps.avisaPaciente(org, consulta);
+    await deps.abreComanda(org, guardada.appointment_id, consulta, guardada);
     return "ja_confirmada";
   }
   // Situação que não é reserva nem confirmação (atendida, faltou): só registra.
@@ -253,5 +262,9 @@ export async function processarPagamento(
   if (!confirmou) return "ja_confirmada";
   // A marca é a trava contra aviso repetido: só quem a gravou avisa o paciente.
   if (await deps.marcaQueConfirmou(org, guardada.id)) await deps.avisaPaciente(org, consulta);
+  // A comanda nasce AGORA, com o dinheiro na conta; ela é FECHADA pela equipe
+  // depois da consulta (o banco exige pessoa e horário já passado para concluir
+  // o atendimento) — é esse fechamento que lança a comissão do repasse.
+  await deps.abreComanda(org, guardada.appointment_id, consulta, guardada);
   return "confirmou";
 }

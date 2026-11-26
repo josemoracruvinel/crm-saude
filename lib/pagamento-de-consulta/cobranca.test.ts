@@ -202,6 +202,7 @@ function depsDeProcessar(p: {
     marcaQueConfirmou: vi.fn(async () => p.marca ?? true),
     avisaPaciente: vi.fn(async () => undefined),
     avisaEquipe: vi.fn(async () => undefined),
+    abreComanda: vi.fn(async () => undefined),
     clock: () => AGORA,
   } satisfies ProcessarDeps;
   return { deps, asaas };
@@ -217,6 +218,28 @@ describe("processarPagamento", () => {
     expect(deps.atualizaCobranca).toHaveBeenCalledWith("org-1", "cp-1", expect.objectContaining({ situacao: "pago" }), AGORA.toISOString());
     expect(deps.confirmaConsulta).toHaveBeenCalledWith("org-1", "ap-1");
     expect(deps.avisaPaciente).toHaveBeenCalledTimes(1);
+  });
+
+  it("pagou: abre a comanda da consulta (o repasse), no reservado e no já confirmado", async () => {
+    const reservada = depsDeProcessar();
+    await processarPagamento(reservada.deps, AVISO);
+    expect(reservada.deps.abreComanda).toHaveBeenCalledWith("org-1", "ap-1", expect.objectContaining({ status: "pending" }), expect.objectContaining({ id: "cp-1" }));
+
+    const confirmada = depsDeProcessar({ consulta: consulta({ status: "confirmed" }) });
+    await processarPagamento(confirmada.deps, AVISO);
+    expect(confirmada.deps.abreComanda).toHaveBeenCalledTimes(1);
+  });
+
+  it("sem comanda quando não houve consulta a atender: pago sem reserva, ainda pendente, ou já atendida", async () => {
+    for (const p of [
+      { consulta: consulta({ status: "cancelled" }) },
+      { lida: lida({ situacao: "pendente" }) },
+      { consulta: consulta({ status: "completed" }) },
+    ]) {
+      const { deps } = depsDeProcessar(p);
+      await processarPagamento(deps, AVISO);
+      expect(deps.abreComanda).not.toHaveBeenCalled();
+    }
   });
 
   it("a decisão vem da releitura: aviso de pagamento com a cobrança ainda pendente não confirma", async () => {

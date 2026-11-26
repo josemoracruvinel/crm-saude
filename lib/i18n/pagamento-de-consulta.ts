@@ -50,4 +50,7 @@ export const TEXTOS_PAGAMENTO_DE_CONSULTA = {
   "O paciente pagou depois que a reserva do horário expirou ou foi cancelada. O dinheiro está na conta Asaas da clínica: remarque a consulta com ele ou faça o estorno pelo Asaas.": {
     es: "El paciente pagó después de que la reserva del horario venció o fue cancelada. El dinero está en la cuenta Asaas de la clínica: reprograme la consulta con él o haga el reembolso por Asaas.",
   },
+  "Pago antecipadamente pelo Asaas. Feche esta comanda depois da consulta, com a forma de pagamento do Asaas.": {
+    es: "Pagado por adelantado por Asaas. Cierre esta comanda después de la consulta, con la forma de pago de Asaas.",
+  },
 } as const;

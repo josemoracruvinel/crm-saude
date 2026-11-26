@@ -8,6 +8,11 @@ Se você roda o DeskcommCRM numa VPS, **leia a seção da versão para a qual es
 
 ## [Não lançado]
 
+## [1.106.0] — 2026-11-26
+### Novidades
+- **A consulta paga pelo Asaas já abre a comanda no nome do profissional, para o repasse.** Quando o pagamento da consulta cai, o sistema abre a comanda com o serviço, o valor pago e o profissional que atende, já com o percentual da regra de comissão. Depois da consulta, a equipe fecha a comanda em Comandas, com a forma de pagamento do Asaas. Fechar marca a consulta como atendida e lança a comissão, que aparece em Faturamento › "Comissão por pessoa" no período escolhido (por exemplo, a semana). Falta ou reembolso: a comanda não é fechada e não gera repasse.
+  - Precisa do módulo **Comandas** instalado (Painel da plataforma › Módulos) e das regras de comissão em Configurações › Financeiro. Sem o módulo, nada muda.
+
 ## [1.105.3] — 2026-11-26
 ### Correções
 - **A mensagem "Pagamento recebido" chega ao paciente quando a consulta foi marcada pelo atendente de IA.** O pagamento já confirmava a consulta e levava o cartão para a etapa de consulta agendada, mas a mensagem ao paciente não saía: a consulta marcada pela IA não fica ligada à conversa, e o aviso só era enviado quando essa ligação existia. Agora, sem a ligação, o aviso vai para a conversa individual mais recente do paciente que ainda está aberta. Nada a fazer na instalação.
